@@ -1,0 +1,47 @@
+#wrapper {width:1200px;margin:0 auto;}
+h1 {margin-bottom:30px;}
+.form-group {margin-left:0px}
+.col-sm-3, .col-sm-4, .col-sm-6, .col-sm-9 {padding-left:0;}
+.ada {
+    margin: 10px 0 20px 0;
+    font-size: 12px;
+}
+.col-lg-12 {padding-left:0;}
+.form-group {margin-right: 10px;}
+.nume {padding:5px;font-weight: 600;text-transform: uppercase;}
+.btn {padding: .275rem 1.95rem;}
+.badge-secondary {
+    background:red;
+    font-size: 14px;
+    font-weight: normal;
+    margin-right: 8px;
+}
+.filtru-ani li {display:inline!important;}
+.anul {margin-top:20px;padding-top:0;padding-bottom:0}
+.anul:nth-child(1) {margin-top:0;}
+.donatii .btn {text-align:left;padding: .275rem 1.05rem;}
+.donatii .btn-sm {margin-top:10px;}
+ 
+.form-control::placeholder {color:#CCC;}
+h5.nume, h4.nume {padding:0}
+textarea.mare {height:800px!important;}
+.rosu {color:red;}
+#more {display: none;}
+
+ 
+
+/* Adaugă la style.css pentru a face rândul să arate interactiv */
+.clickable-row {
+    cursor: pointer;
+}
+.clickable-row:hover {
+    /* Bootstrap 5 adaugă deja un fundal ușor pe hover, 
+       dar poți adăuga o umbră subtilă dacă dorești */
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1); 
+}
+
+
+@media only screen and (max-width: 600px) {
+
+    header img {max-width:100%}
+}
