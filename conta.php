@@ -174,7 +174,7 @@ while ($date = mysqli_fetch_assoc($result)){
             "order": [], 
             "searching": true, 
             language: {
-                url: 'http://localhost/managerot/js/dataTablesRomana.json'
+                url: '<?php echo BASE_URL; ?>js/dataTablesRomana.json'
             }
         });
 
