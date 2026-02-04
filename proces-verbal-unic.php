@@ -127,7 +127,10 @@ if (file_exists($target_dir . $file_name)) {
 
     $rez=mysqli_query($conn, $sql_file_path);
 
-    header('Location:lista-donatii.php?id=' .  $id_asistat . "&persoana=" . $nume . '-'  . $prenume . '&an=' . $anul);
+    $back_link = 'total-donatii.php?an=' . urlencode($anul) . '#donatie-' . urlencode($id_donatie);
+
+    header('Location: ' . $back_link);
+    exit;
 
 } else {echo "Problem updating record.MySQL Error: " . mysqli_error($query);}
 

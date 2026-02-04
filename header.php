@@ -89,6 +89,12 @@ setlocale(LC_TIME, array('ro.utf-8', 'ro_RO.UTF-8', 'ro_RO.utf-8', 'ro', 'ro_RO'
                         <i class="bi bi-box-arrow-right me-1"></i>Logout
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="https://ortodoxiatinerilor.ro/managerot/donatii-publice.php">
+                        <i class="bi bi-globe me-1"></i>
+                       Donații publice
+                    </a>
+                </li>
             </ul>
         </div>
     </div>

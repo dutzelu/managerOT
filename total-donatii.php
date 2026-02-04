@@ -194,7 +194,7 @@ while ($date = mysqli_fetch_assoc($result)){
     $data_formatata = strftime("%d %b. %Y", strtotime($data_db)); 
     
     
-    $luna_buffer .= '<li class="list-group-item">';
+    $luna_buffer .= '<li class="list-group-item" id="donatie-' . htmlspecialchars($date['id_donatie']) . '">';
         // ID, Data, Nume și Edit + DELETE (MODIFICAT AICI)
         $luna_buffer .= '<div class="d-flex justify-content-between align-items-center">';
             $luna_buffer .= '<div>';
@@ -256,6 +256,20 @@ if ($ultima_luna_afisata !== null) {
 }
  
 echo "</div>"; // Închide div#accordionExample
+
+echo "<script>";
+echo "document.addEventListener('DOMContentLoaded', function () {";
+echo "  if (!window.location.hash) { return; }";
+echo "  var target = document.querySelector(window.location.hash);";
+echo "  if (!target) { return; }";
+echo "  var collapseEl = target.closest('.accordion-collapse');";
+echo "  if (collapseEl) {";
+echo "    var collapse = bootstrap.Collapse.getOrCreateInstance(collapseEl, { toggle: false });";
+echo "    collapse.show();";
+echo "  }";
+echo "  target.scrollIntoView({ behavior: 'smooth', block: 'center' });";
+echo "});";
+echo "</script>";
 
 include "footer.php";
 
