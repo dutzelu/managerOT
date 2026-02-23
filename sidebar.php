@@ -1,7 +1,7 @@
 <div class="menu-principal p-3">
     <ul class="nav nav-pills flex-column mb-4">
         <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="index.php">
+            <a class="nav-link active" aria-current="page" href="<?php echo BASE_URL;?>index.php">
                 <i class="bi bi-house-door-fill me-2"></i> Dashboard
             </a>
         </li>
@@ -14,27 +14,32 @@
     
     <ul class="nav nav-pills flex-column mb-4">
         <li class="nav-item">
-            <a class="nav-link" href="asistati.php">
+            <a class="nav-link" href="<?php echo BASE_URL;?>asistati.php">
                 <i class="bi bi-person-lines-fill me-2"></i> Asistați Sociali
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="contracte.php">
+            <a class="nav-link" href="<?php echo BASE_URL;?>contracte.php">
                 <i class="bi bi-file-earmark-spreadsheet-fill me-2"></i> Contracte
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="campanii.php">
+            <a class="nav-link" href="<?php echo BASE_URL;?>campanii.php">
                 <i class="bi bi-megaphone-fill me-2"></i> Campanii
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="total-donatii.php">
+            <a class="nav-link" href="<?php echo BASE_URL;?>pelerinaje/pelerinaje.php">
+                <i class="bi bi-airplane-fill me-2"></i> Pelerinaje
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="<?php echo BASE_URL;?>total-donatii.php">
                 <i class="bi bi-cash-stack me-2"></i> Total Donații
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="conta.php">
+            <a class="nav-link" href="<?php echo BASE_URL;?>conta.php">
                 <i class="bi bi-calculator-fill me-2"></i> Tabel Contabilitate
             </a>
         </li>
@@ -47,23 +52,28 @@
 
     <ul class="nav nav-pills flex-column mb-4">
         <li class="nav-item">
-            <a class="nav-link" href="adauga-donatie.php">
+            <a class="nav-link" href="<?php echo BASE_URL;?>adauga-donatie.php">
                 <i class="bi bi-currency-dollar me-2"></i> Adaugă Donație
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="asistat-social-nou.php">
+            <a class="nav-link" href="<?php echo BASE_URL;?>asistat-social-nou.php">
                 <i class="bi bi-person-plus-fill me-2"></i> Asistat Social Nou
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="adauga-contract.php">
+            <a class="nav-link" href="<?php echo BASE_URL;?>adauga-contract.php">
                 <i class="bi bi-file-earmark-plus-fill me-2"></i> Contract Nou
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="adauga-campanie.php">
+            <a class="nav-link" href="<?php echo BASE_URL;?>adauga-campanie.php">
                 <i class="bi bi-calendar-event-fill me-2"></i> Adaugă Campanie
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="<?php echo BASE_URL;?>pelerinaje/add_pelerinaj.php">
+                <i class="bi bi-airplane-fill me-2"></i> Adaugă Pelerinaj
             </a>
         </li>
     </ul>

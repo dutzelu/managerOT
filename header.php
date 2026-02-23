@@ -46,8 +46,8 @@ setlocale(LC_TIME, array('ro.utf-8', 'ro_RO.UTF-8', 'ro_RO.utf-8', 'ro', 'ro_RO'
 
 <nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top">
     <div class="container">
-        <a class="navbar-brand" href="index.php">
-            <img src="logo-manager-OT.png" alt="Logo Manager OT" height="80">
+        <a class="navbar-brand" href="<?php echo BASE_URL;?>index.php">
+            <img src="<?php echo BASE_URL;?>logo-manager-OT.png" alt="Logo Manager OT" height="80">
             </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>

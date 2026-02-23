@@ -26,9 +26,10 @@ if (
 // Domeniul (de ex. localhost, siteulmeu.ro etc.)
 $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
 
-// Calea până la aplicație
-$scriptName = $_SERVER['SCRIPT_NAME'] ?? '';
-$basePath = rtrim(str_replace('\\', '/', dirname($scriptName)), '/');
+// Calea până la aplicație (bazată pe locația conexiune.php, nu pe scriptul curent)
+$appDir  = str_replace('\\', '/', dirname(__FILE__));
+$docRoot = str_replace('\\', '/', rtrim($_SERVER['DOCUMENT_ROOT'], '/\\'));
+$basePath = rtrim(str_replace($docRoot, '', $appDir), '/');
 
 // Construim BASE_URL (mereu cu slash la final)
 define('BASE_URL', $protocol . $host . ($basePath ? $basePath . '/' : '/'));

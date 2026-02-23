@@ -1,0 +1,8 @@
+# Protejează directorul de listare publică
+Options -Indexes
+
+# Permite doar accesul la fișiere specifice
+<FilesMatch "\.(jpg|jpeg|png|pdf)$">
+    Order Allow,Deny
+    Allow from all
+</FilesMatch>
