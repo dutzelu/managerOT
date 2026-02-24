@@ -1,5 +1,5 @@
-<?php
-include "header.php";
+﻿<?php
+include "includes/header.php";
 
 // Recomandare: Dacă test_input() nu folosește mysqli_real_escape_string sau prepared statements,
 // există riscul de SQL Injection. Asigură-te că funcția test_input() este sigură.

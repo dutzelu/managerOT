@@ -1,9 +1,9 @@
-<?php
+﻿<?php
 // update-asistat-social-nou.php - Adaugare Asistat Social (SECURIZAT)
 
 // Include conexiunea la baza de date ($conn) și funcțiile (inclusiv test_input și replaceSpecialChars)
 // Presupunem că $conn este definit în conexiune.php (inclus prin header.php)
-include "header.php"; 
+include "includes/header.php"; 
 
 // Inițializări necesare pentru a preveni erorile de variabile nedefinite
 $errors = []; 
@@ -146,5 +146,5 @@ if(isset ($_POST["submit"]) ) {
     echo '<div class="container mt-4"><div class="alert alert-warning"><i class="bi bi-exclamation-triangle-fill me-2"></i> Acces invalid. Vă rugăm folosiți formularul de adăugare.</div></div>';
 }
 
-include "footer.php";
+include "includes/footer.php";
 ?>

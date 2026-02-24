@@ -1,6 +1,6 @@
-<?php
+﻿<?php
 $titlu_pg = "Detalii Pelerin";
-include "../header.php";
+include "../includes/header.php";
 
 // Verifică dacă avem ID-ul pelerinului
 if(!isset($_GET['id']) || !is_numeric($_GET['id'])) {
@@ -136,7 +136,7 @@ $stmt->close();
 <div class="container">
     <div class="row">
         <div class="col-md-3 d-none d-md-block">          
-            <?php include "../sidebar.php";?>
+            <?php include "../includes/sidebar.php";?>
         </div>
 
         <div class="col-12 col-md-9">
@@ -328,13 +328,22 @@ $stmt->close();
                             <label for="upload_pasaport" class="form-label">
                                 Încarcă Copie Pașaport (PDF, JPEG, PNG - max 10MB)
                             </label>
-                            <?php if(!empty($pelerin['upload_pasaport'])): ?>
-                                <div class="alert alert-info py-2 mb-2">
-                                    <i class="bi bi-file-earmark-check me-2"></i>
-                                    Fișier curent: 
-                                    <a href="<?php echo htmlspecialchars($pelerin['upload_pasaport']); ?>" target="_blank" class="alert-link">
-                                        Vezi pașaport
-                                    </a>
+                            <?php if(!empty($pelerin['upload_pasaport'])): 
+                                $ext = strtolower(pathinfo($pelerin['upload_pasaport'], PATHINFO_EXTENSION));
+                            ?>
+                                <div class="mb-2">
+                                    <?php if(in_array($ext, ['jpg','jpeg','png'])): ?>
+                                        <img src="<?php echo htmlspecialchars($pelerin['upload_pasaport']); ?>" 
+                                             class="img-fluid rounded border" style="max-height:320px;" alt="Pașaport">
+                                    <?php elseif($ext === 'pdf'): ?>
+                                        <embed src="<?php echo htmlspecialchars($pelerin['upload_pasaport']); ?>" 
+                                               type="application/pdf" width="100%" height="320px" class="border rounded">
+                                    <?php endif; ?>
+                                    <div class="mt-1">
+                                        <a href="<?php echo htmlspecialchars($pelerin['upload_pasaport']); ?>" target="_blank" class="btn btn-sm btn-outline-secondary">
+                                            <i class="bi bi-box-arrow-up-right me-1"></i>Deschide în tab nou
+                                        </a>
+                                    </div>
                                 </div>
                             <?php endif; ?>
                             <input type="file" class="form-control" id="upload_pasaport" name="upload_pasaport" accept=".pdf,.jpg,.jpeg,.png">
@@ -410,4 +419,4 @@ $stmt->close();
     </div>
 </div>
 
-<?php include "../footer.php"; ?>
+<?php include "../includes/footer.php"; ?>

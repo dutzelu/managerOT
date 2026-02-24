@@ -1,7 +1,7 @@
-<?php
+﻿<?php
 
 $titlu_pg = "Adaugă Donație";
-include "header.php";
+include "includes/header.php";
 
 // Functia test_input ar trebui sa fie definita in header.php sau intr-un fisier inclus de acesta.
 // Asigurati-va ca aceasta functie exista.
@@ -165,7 +165,7 @@ $rezultate_asistati = mysqli_query($conn, $sql_asistati);
 <div class="container">
     <div class="row">
         <div class="col-md-3 d-none d-md-block">          
-            <?php include "sidebar.php";?>
+            <?php include "includes/sidebar.php";?>
         </div>
 
         <div class="col-12 col-md-9">
@@ -309,5 +309,5 @@ $rezultate_asistati = mysqli_query($conn, $sql_asistati);
 </div>
 
 <?php 
-include "footer.php";
+include "includes/footer.php";
 ?>

@@ -1,6 +1,6 @@
-<?php
+﻿<?php
 $titlu_pg ="Editează Asistat Social";
-include "header.php"; 
+include "includes/header.php"; 
 
 $success_message = '';
 $error_message = '';
@@ -41,7 +41,7 @@ if (isset($_POST['delete_id']) && is_numeric($_POST['delete_id'])) {
 // --- 2. VALIDARE ID ---
 if (empty($id) || !is_numeric($id)) {
     echo '<div class="alert alert-danger mt-4 container">ID invalid sau inexistent.</div>';
-    include "footer.php"; exit();
+    include "includes/footer.php"; exit();
 }
 
 // --- 3. PROCESARE UPDATE ---
@@ -95,7 +95,7 @@ $stmt_get->execute();
 $res = $stmt_get->get_result();
 $asistat = $res->fetch_assoc();
 
-if (!$asistat) { echo "Asistatul nu există."; include "footer.php"; exit(); }
+if (!$asistat) { echo "Asistatul nu există."; include "includes/footer.php"; exit(); }
 
 // Calculăm datele din CNP pentru afișare
 $info = extrageDateCNP($asistat['cnp']);
@@ -104,7 +104,7 @@ $info = extrageDateCNP($asistat['cnp']);
 <div class="container mt-4">
     <div class="row">
         <div class="col-md-3 d-none d-md-block">          
-            <?php include "sidebar.php";?>
+            <?php include "includes/sidebar.php";?>
         </div>
 
         <div class="col-12 col-md-9">
@@ -251,4 +251,4 @@ $info = extrageDateCNP($asistat['cnp']);
   </div>
 </div>
 
-<?php include "footer.php"; ?>
+<?php include "includes/footer.php"; ?>

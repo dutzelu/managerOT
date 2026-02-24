@@ -1,6 +1,6 @@
- <?php 
+﻿ <?php 
 $titlu_pg ="Contract nou";
-include "header.php"; // Presupune includerea conexiunii la baza de date ($conn)
+include "includes/header.php"; // Presupune includerea conexiunii la baza de date ($conn)
 
 // Variabila pentru mesajul de succes, preluată din URL dacă a avut loc o redirecționare după inserare
 $numar_contract_succes = $_GET['contract'] ?? null; 
@@ -94,7 +94,7 @@ if (isset($_POST['submit'])) {
 <div class="container">
     <div class="row">
         <div class="col-md-3 d-none d-md-block">          
-            <?php include "sidebar.php";?>
+            <?php include "includes/sidebar.php";?>
         </div>
 
         <div class="col-12 col-md-9">
@@ -173,5 +173,5 @@ if (isset($_POST['submit'])) {
 </div>
 
 <?php 
-include "footer.php";
+include "includes/footer.php";
 ?>

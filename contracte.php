@@ -1,6 +1,6 @@
-<?php
+﻿<?php
 $titlu_pg = "Lista Contractelor";
-include "header.php"; // Presupune includerea conexiunii la baza de date ($conn)
+include "includes/header.php"; // Presupune includerea conexiunii la baza de date ($conn)
 
 // --- 1. EXTRAGEREA ANILOR UNICI DIN BAZA DE DATE (Pentru Filtru) ---
 $sql_ani = "SELECT DISTINCT YEAR(data_semnarii) AS an FROM contracte WHERE data_semnarii IS NOT NULL ORDER BY an DESC";
@@ -55,7 +55,7 @@ $num_rows = $result->num_rows;
 <div class="container">
     <div class="row">
         <div class="col-md-3 d-none d-md-block">          
-            <?php include "sidebar.php";?>
+            <?php include "includes/sidebar.php";?>
         </div>
 
         <div class="col-12 col-md-9">
@@ -172,5 +172,5 @@ document.addEventListener("DOMContentLoaded", function() {
 </script>
 
 <?php 
-include "footer.php";
+include "includes/footer.php";
 ?>

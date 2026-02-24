@@ -1,7 +1,7 @@
-<?php
+﻿<?php
 // sterge-campanie.php - Gestionează ștergerea unei campanii
 
-include "header.php"; // Include conexiunea ($conn) și verificarea sesiunii
+include "includes/header.php"; // Include conexiunea ($conn) și verificarea sesiunii
 
 // 1. Verifică ID-ul
 $id = $_GET['id'] ?? null;

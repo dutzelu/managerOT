@@ -1,6 +1,6 @@
-<?php
+﻿<?php
 $titlu_pg = "Adaugă donație";
-include "header.php";
+include "includes/header.php";
 
 if (isset($_GET['donatie'])) {
   $asistat = $_GET['donatie'];
@@ -85,6 +85,6 @@ header('Location:adauga-donatie.php?donatiepentruid=' .  $id_asistat . '&suma=' 
 
 
 
-include "footer.php";
+include "includes/footer.php";
 
 ?>

@@ -1,7 +1,7 @@
- <?php
+﻿ <?php
 $titlu_pg = "Editare donație";
 // Asigură-te că fișierul header.php include legăturile CSS/JS pentru Bootstrap 5
-include "header.php";
+include "includes/header.php";
 
 ?>
 
@@ -9,7 +9,7 @@ include "header.php";
 <div class="container">
     <div class="row">
         <div class="col-md-3 d-none d-md-block">          
-            <?php include "sidebar.php";?>
+            <?php include "includes/sidebar.php";?>
         </div>
 
         <div class="col-12 col-md-9">
@@ -27,7 +27,7 @@ include "header.php";
         // Verificare dacă ID-ul este setat, altfel redirecționează sau afișează o eroare
         if (empty($id) || !is_numeric($id)) {
             echo '<div class="alert alert-danger container mt-5">ID-ul donației este invalid sau lipsește!</div>';
-            include "footer.php";
+            include "includes/footer.php";
             exit;
         }
 
@@ -47,7 +47,7 @@ include "header.php";
 
             if (!$data) {
                 echo '<div class="alert alert-warning container mt-5">Nu s-a găsit nicio donație cu ID-ul specificat.</div>';
-                include "footer.php";
+                include "includes/footer.php";
                 exit;
             }
 
@@ -94,7 +94,7 @@ include "header.php";
 
         } catch (Exception $e) {
             echo '<div class="alert alert-danger container mt-5">Eroare Bază de Date: ' . $e->getMessage() . '</div>';
-            include "footer.php";
+            include "includes/footer.php";
             exit;
         }
 
@@ -208,5 +208,5 @@ include "header.php";
 <?php 
 // Notă: Această linie închide structura începută de header.php
 // (col-9, row, container, wrapper, body, html)
-include "footer.php";
+include "includes/footer.php";
 ?>

@@ -1,6 +1,6 @@
-<?php
+﻿<?php
 $titlu_pg = "Adaugă Pelerinaj";
-include "../header.php";
+include "../includes/header.php";
 
 $succes_insert = false;
 $errori = [];
@@ -68,7 +68,7 @@ if(isset($_POST["submit"])) {
 <div class="container">
     <div class="row">
         <div class="col-md-3 d-none d-md-block">          
-            <?php include "../sidebar.php";?>
+            <?php include "../includes/sidebar.php";?>
         </div>
 
         <div class="col-12 col-md-9">
@@ -197,4 +197,4 @@ if(isset($_POST["submit"])) {
     </div>
 </div>
 
-<?php include "../footer.php"; ?>
+<?php include "../includes/footer.php"; ?>

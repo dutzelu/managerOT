@@ -1,6 +1,6 @@
-<?php 
-include "conexiune.php";
-include "functii.php";
+﻿<?php 
+include __DIR__ . "/conexiune.php";
+include __DIR__ . "/functii.php";
 
 // 1. PORNEȘTE SESIUNEA PRIMA DATĂ
 session_start();
@@ -29,7 +29,7 @@ setlocale(LC_TIME, array('ro.utf-8', 'ro_RO.UTF-8', 'ro_RO.utf-8', 'ro', 'ro_RO'
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="<?php echo BASE_URL;?>/style.css">
+    <link rel="stylesheet" href="<?php echo BASE_URL;?>includes/style.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.12.1/css/dataTables.bootstrap4.min.css"> 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     
@@ -47,7 +47,7 @@ setlocale(LC_TIME, array('ro.utf-8', 'ro_RO.UTF-8', 'ro_RO.utf-8', 'ro', 'ro_RO'
 <nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top">
     <div class="container">
         <a class="navbar-brand" href="<?php echo BASE_URL;?>index.php">
-            <img src="<?php echo BASE_URL;?>logo-manager-OT.png" alt="Logo Manager OT" height="80">
+            <img src="<?php echo BASE_URL;?>includes/logo-manager-OT.png" alt="Logo Manager OT" height="80">
             </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>

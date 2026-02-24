@@ -1,6 +1,6 @@
-<?php 
+﻿<?php 
 $titlu_pg ="Formular Asistat Social Nou";
-include "header.php"; // Include conexiunea la baza de date ($conn)
+include "includes/header.php"; // Include conexiunea la baza de date ($conn)
 
 // Preluarea numelui asistatului pentru mesajul de succes
 $asistat = $_GET['asistat'] ?? null; 
@@ -9,7 +9,7 @@ $asistat = $_GET['asistat'] ?? null;
 <div class="container">
     <div class="row">
         <div class="col-md-3 d-none d-md-block">          
-            <?php include "sidebar.php";?>
+            <?php include "includes/sidebar.php";?>
         </div>
 
         <div class="col-12 col-md-9">
@@ -164,5 +164,5 @@ $asistat = $_GET['asistat'] ?? null;
 </div>
 
 <?php 
-include "footer.php";
+include "includes/footer.php";
 ?>

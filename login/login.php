@@ -1,9 +1,9 @@
-<?php
+﻿<?php
 // Pornește sesiunea
 session_start();
  
 // Include conexiunea la baza de date
-include "../conexiune.php"; // Folosește variabila $conn
+include "../includes/conexiune.php"; // Folosește variabila $conn
 // Presupunem că BASE_URL este definită în conexiune.php sau config.php
 if (!defined('BASE_URL')) {
     // Defineste o valoare implicită dacă nu e definită (pentru a evita erori)
@@ -41,7 +41,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         $_SESSION["nume_utilizator"] = $nume_utilizator_db;
                         
                         // Redirecționează utilizatorul la pagina principală
-                        header("location:" . BASE_URL . "../index.php");
+                        header("location:" . BASE_URL . "index.php");
                     } else {
                         // Parolă incorectă
                         $eroare = "Nume utilizator sau parolă incorectă.";
@@ -88,7 +88,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <div class="col-11 col-md-4 login-container"> 
         
         <a class="mb-4 d-block text-center" href="<?php echo BASE_URL;?>index.php">
-            <img src="../logo-manager-OT.png" alt="Logo Manager OT">
+            <img src="../includes/logo-manager-OT.png" alt="Logo Manager OT">
         </a>
         
         <h4 class="text-center mb-4">Autentificare</h4>

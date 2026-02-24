@@ -1,14 +1,14 @@
-<?php
+﻿<?php
 // lista-donatii.php - Lista donațiilor către un asistat social
 $titlu_pg = "Lista donațiilor";
 // Include conexiunea la baza de date ($conn) și funcțiile (inclusiv setlocale)
-include "header.php"; 
+include "includes/header.php"; 
 ?>
 
 <div class="container">
     <div class="row">
         <div class="col-md-3 d-none d-md-block">          
-            <?php include "sidebar.php";?>
+            <?php include "includes/sidebar.php";?>
         </div>
 
         <div class="col-12 col-md-9">
@@ -22,7 +22,7 @@ $an = $_GET['an'] ?? date("Y"); // Anul selectat (implicit: anul curent)
 
 if (empty($id) || !is_numeric($id)) {
     echo '<div class="container mt-4"><div class="alert alert-info"><i class="bi bi-x-circle-fill me-2"></i> ID-ul asistatului social lipsește sau este invalid.</div></div>';
-    include "footer.php";
+    include "includes/footer.php";
     exit;
 }
 
@@ -219,5 +219,5 @@ if ($stmt === false) {
 
 echo '</div>'; // Închide container-ul principal
 
-include "footer.php";
+include "includes/footer.php";
 ?>

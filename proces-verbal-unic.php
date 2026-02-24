@@ -1,6 +1,6 @@
-<?php
+﻿<?php
 $titlu_pg = "Proces verbal unic";
-include "header.php";
+include "includes/header.php";
 
 ob_start();
 

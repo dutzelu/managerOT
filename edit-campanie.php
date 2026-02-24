@@ -1,8 +1,8 @@
-<?php
+﻿<?php
 // edit-campanie.php - Editare Campanie
 $titlu_pg = "Editare Campanie";
 // Presupunând că header.php include conexiunea la baza de date ($conn)
-include "header.php"; 
+include "includes/header.php"; 
 
 $campanie = null;
 $errors = [];
@@ -60,7 +60,7 @@ $id_to_fetch = (isset($_POST['id']) && is_numeric($_POST['id'])) ? (int)$_POST['
 
 if (empty($id_to_fetch)) {
     echo '<div class="container mt-4"><div class="alert alert-danger">ID-ul campaniei lipsește sau este invalid.</div></div>';
-    include "footer.php";
+    include "includes/footer.php";
     exit();
 }
 
@@ -76,7 +76,7 @@ if ($result->num_rows > 0) {
     $titlu_pg = "Editare Campania: " . htmlspecialchars($campanie['nume']);
 } else {
     echo '<div class="container mt-4"><div class="alert alert-danger">Campania cu ID-ul ' . htmlspecialchars($id_to_fetch) . ' nu a fost găsită.</div></div>';
-    include "footer.php";
+    include "includes/footer.php";
     exit();
 }
 $stmt_select->close();
@@ -96,7 +96,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 <div class="container">
     <div class="row">
         <div class="col-md-3 d-none d-md-block">          
-            <?php include "sidebar.php";?>
+            <?php include "includes/sidebar.php";?>
         </div>
 
         <div class="col-12 col-md-9">
@@ -173,5 +173,5 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 <?php 
 // Presupunând că footer.php include și inițializarea TinyMCE
-include "footer.php";
+include "includes/footer.php";
 ?>

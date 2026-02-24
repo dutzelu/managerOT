@@ -1,5 +1,5 @@
-<?php
-include "header.php";
+﻿<?php
+include "includes/header.php";
 // Verificăm dacă formularul a fost trimis
 if (isset($_POST['submit'])) {
     // Preluăm valorile din formular

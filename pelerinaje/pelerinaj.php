@@ -1,6 +1,6 @@
-<?php
+﻿<?php
 $titlu_pg = "Detalii Pelerinaj";
-include "../header.php";
+include "../includes/header.php";
 
 // Verifică dacă avem ID-ul pelerinajului
 if(!isset($_GET['id']) || !is_numeric($_GET['id'])) {
@@ -70,13 +70,20 @@ switch($pelerinaj['status']) {
 <div class="container">
     <div class="row">
         <div class="col-md-3 d-none d-md-block">          
-            <?php include "../sidebar.php";?>
+            <?php include "../includes/sidebar.php";?>
         </div>
 
         <div class="col-12 col-md-9">
 
 <div class="container mt-4 mb-5">
-    
+
+    <?php if(isset($_GET['deleted']) && $_GET['deleted'] === 'success'): ?>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>Pelerinul a fost șters cu succes.
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <?php endif; ?>
+
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="mb-0">
@@ -216,8 +223,6 @@ switch($pelerinaj['status']) {
                             <tr>
                                 <th>Nr.</th>
                                 <th>Nume Complet</th>
-                                <th>Data Nașterii</th>
-                                <th>Telefon</th>
                                 <th>Călătorie</th>
                                 <th>Plată Euro</th>
                                 <th>Plată Dolari</th>
@@ -229,14 +234,13 @@ switch($pelerinaj['status']) {
                             <?php 
                             $nr = 1;
                             foreach($pelerini_array as $pelerin): 
+                            $pelerin_url = 'pelerin.php?id=' . $pelerin['id'] . '&nume=' . urlencode($pelerin['nume']) . '&prenume=' . urlencode($pelerin['prenume']);
                             ?>
-                            <tr>
+                            <tr style="cursor:pointer;" onclick="window.location='<?php echo $pelerin_url; ?>'">
                                 <td><?php echo $nr++; ?></td>
                                 <td>
                                     <strong><?php echo htmlspecialchars($pelerin['nume'] . ' ' . $pelerin['prenume']); ?></strong>
                                 </td>
-                                <td><?php echo date('d/m/Y', strtotime($pelerin['data_nasterii'])); ?></td>
-                                <td><?php echo htmlspecialchars($pelerin['telefon']); ?></td>
                                 <td>
                                     <?php if($pelerin['cu_sau_fara_avion'] == 'cu avion'): ?>
                                         <span class="badge bg-info">
@@ -249,10 +253,15 @@ switch($pelerinaj['status']) {
                                 <td><?php echo number_format($pelerin['plata_euro'], 0, ',', '.'); ?> €</td>
                                 <td><?php echo number_format($pelerin['plata_dolari'], 0, ',', '.'); ?> $</td>
                                 <td><?php echo date('d.m.Y H:i', strtotime($pelerin['data_inscriere'])); ?></td>
-                                <td>
-                                    <a href="pelerin.php?id=<?php echo $pelerin['id']; ?>&nume=<?php echo urlencode($pelerin['nume']); ?>&prenume=<?php echo urlencode($pelerin['prenume']); ?>" 
+                                <td style="white-space:nowrap;" onclick="event.stopPropagation();">
+                                    <a href="<?php echo $pelerin_url; ?>" 
                                        class="btn btn-sm btn-outline-primary" title="Vezi detalii">
                                         <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="delete_pelerin.php?id=<?php echo $pelerin['id']; ?>&pelerinaj_id=<?php echo $pelerinaj_id; ?>" 
+                                       class="btn btn-sm btn-outline-danger ms-1" title="Șterge pelerin"
+                                       onclick="return confirm('Ești sigur că vrei să ștergi pelerinul <?php echo addslashes(htmlspecialchars($pelerin['nume'] . ' ' . $pelerin['prenume'])); ?>?');">
+                                        <i class="bi bi-trash"></i>
                                     </a>
                                 </td>
                             </tr>
@@ -323,8 +332,9 @@ $(document).ready(function() {
         language: {
             url: '//cdn.datatables.net/plug-ins/1.12.1/i18n/ro.json'
         },
-        order: [[8, 'desc']],
-        pageLength: 25
+        order: [[5, 'desc']],
+        paging: false,
+        info: false
     });
 });
 </script>
@@ -333,4 +343,4 @@ $(document).ready(function() {
     </div>
 </div>
 
-<?php include "../footer.php"; ?>
+<?php include "../includes/footer.php"; ?>

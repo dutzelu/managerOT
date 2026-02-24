@@ -1,6 +1,6 @@
-<?php
-include "../conexiune.php";
-include "../functii.php";
+﻿<?php
+include "../includes/conexiune.php";
+include "../includes/functii.php";
 
 $succes_insert = false;
 $errori = [];

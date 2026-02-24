@@ -1,11 +1,11 @@
-<?php
-include "conexiune.php";
-include "functii.php";
+﻿<?php
+include "includes/conexiune.php";
+include "includes/functii.php";
 
 $titlu_pg = "Transparență și Donații în timp real - Asociația Ortodoxia Tinerilor";
 $descriere_pg = "Vezi în timp real cum folosim donațiile tale. Sprijin pentru centre sociale, familii nevoiașe și proiecte culturale.";
 $url_pagina = "https://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-$imagine_share = "https://" . $_SERVER['HTTP_HOST'] . "/managerot/logo-OT.png"; 
+$imagine_share = "https://" . $_SERVER['HTTP_HOST'] . "/managerot/includes/logo-OT.png"; 
 
 setlocale(LC_ALL, 'ro_RO.UTF-8');
 
@@ -125,7 +125,7 @@ $month_names_ro = [1=>'Ianuarie', 2=>'Februarie', 3=>'Martie', 4=>'Aprilie', 5=>
 
 <header class="header-centrat">
     <div class="container text-center">
-        <img src="logo-OT.png" alt="Logo Asociația Ortodoxia Tinerilor" class="logo-img-large mb-4">
+        <img src="includes/logo-OT.png" alt="Logo Asociația Ortodoxia Tinerilor" class="logo-img-large mb-4">
         <div class="d-flex justify-content-center gap-4 flex-wrap text-muted small fw-600">
             <span><i class="bi bi-geo-alt-fill text-primary"></i> Str. Frunzei nr. 5, Galați</span>
             <span><i class="bi bi-whatsapp text-success"></i> +4 0740 004 215</span>

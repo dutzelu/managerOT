@@ -1,6 +1,6 @@
-<?php
+﻿<?php
 $titlu_pg = "Tabel anual contabilitate";
-include "header.php";
+include "includes/header.php";
 
 if (isset($_GET['an'])) {
     $an = $_GET['an'];

@@ -1,7 +1,7 @@
-<?php
+﻿<?php
 // Setarea Titlului și includerea header-ului (care face verificarea de sesiune)
 $titlu_pg = "Lista Simplificată a Asistaților Sociali";
-include "header.php";
+include "includes/header.php";
 
 // Nu mai interogăm baza de date pe baza parametrului GET, ci luăm toate datele
 $sql = "SELECT id, nume, prenume, cnp, telefon FROM `asistati_social` ORDER BY `nume`, `prenume`";
@@ -15,7 +15,7 @@ $search_term = $_GET['search'] ?? '';
 <div class="container">
     <div class="row">
         <div class="col-md-3 d-none d-md-block">          
-            <?php include "sidebar.php";?>
+            <?php include "includes/sidebar.php";?>
         </div>
 
         <div class="col-12 col-md-9">
@@ -120,5 +120,5 @@ $search_term = $_GET['search'] ?? '';
 </script>
 
 <?php 
-include "footer.php"; 
+include "includes/footer.php"; 
 ?>

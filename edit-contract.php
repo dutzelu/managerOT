@@ -1,6 +1,6 @@
-<?php
+﻿<?php
 $titlu_pg = "Editează Contract";
-include "header.php"; // Include conexiunea la baza de date ($conn)
+include "includes/header.php"; // Include conexiunea la baza de date ($conn)
 
 // --- 1. PROCESARE FORMULAR DE ACTUALIZARE ---
 $success_message = '';
@@ -83,7 +83,7 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
      $id = (int)$_POST['id'];
 } else {
     echo '<div class="alert alert-danger mt-4 container">ID-ul contractului lipsește sau este invalid.</div>';
-    include "footer.php";
+    include "includes/footer.php";
     exit();
 }
 
@@ -94,7 +94,7 @@ $result_select = $stmt_select->get_result();
 
 if ($result_select->num_rows === 0) {
     echo '<div class="alert alert-danger mt-4 container">Contractul cu ID-ul ' . htmlspecialchars($id) . ' nu a fost găsit.</div>';
-    include "footer.php";
+    include "includes/footer.php";
     exit();
 }
 
@@ -109,7 +109,7 @@ $suma_afisata = number_format($contract['suma'] ?? 0, 2, '.', '');
 <div class="container">
     <div class="row">
         <div class="col-md-3 d-none d-md-block">          
-            <?php include "sidebar.php";?>
+            <?php include "includes/sidebar.php";?>
         </div>
 
         <div class="col-12 col-md-9">
@@ -241,5 +241,5 @@ $suma_afisata = number_format($contract['suma'] ?? 0, 2, '.', '');
 </div>
 
 <?php 
-include "footer.php";
+include "includes/footer.php";
 ?>

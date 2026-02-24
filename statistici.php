@@ -1,6 +1,6 @@
-<?php
+﻿<?php
 $titlu_pg = "Toate donațiile";
-include "header.php";
+include "includes/header.php";
 
 setlocale(LC_ALL, 'ro_RO');
 
@@ -140,7 +140,7 @@ echo "</ul>";
 
 
 
-include "footer.php";
+include "includes/footer.php";
 ?>
 
 

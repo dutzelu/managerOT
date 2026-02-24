@@ -1,6 +1,6 @@
-<?php 
+﻿<?php 
 $titlu_pg ="Campanie nouă";
-include "header.php"; // Presupune că include conexiunea ($conn), verificarea sesiunii și Bootstrap 5
+include "includes/header.php"; // Presupune că include conexiunea ($conn), verificarea sesiunii și Bootstrap 5
 
 // Preluare nume campanie pentru mesajul de succes de la update-adauga-campanie.php
 $nume_campanie_succes = $_GET['campanie'] ?? null;
@@ -10,7 +10,7 @@ $nume_campanie_succes = $_GET['campanie'] ?? null;
 <div class="container">
     <div class="row">
         <div class="col-md-3 d-none d-md-block">          
-            <?php include "sidebar.php";?>
+            <?php include "includes/sidebar.php";?>
         </div>
 
         <div class="col-12 col-md-9">
@@ -91,5 +91,5 @@ $nume_campanie_succes = $_GET['campanie'] ?? null;
 </div>
 
 <?php 
-include "footer.php";
+include "includes/footer.php";
 ?>

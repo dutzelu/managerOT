@@ -1,8 +1,8 @@
-<?php
+﻿<?php
 // campanii.php - Lista Campaniilor
 $titlu_pg = "Lista Campaniilor";
 // Presupunând că header.php include conexiunea la baza de date ($conn) și gestionează sesiunea
-include "header.php";
+include "includes/header.php";
 
 // --- Logica PHP pentru Anii de Filtrare ---
 
@@ -54,7 +54,7 @@ $stmt->close();
 <div class="container">
     <div class="row">
         <div class="col-md-3 d-none d-md-block">          
-            <?php include "sidebar.php";?>
+            <?php include "includes/sidebar.php";?>
         </div>
 
         <div class="col-12 col-md-9">
@@ -136,5 +136,5 @@ $stmt->close();
 </div>
 
 <?php 
-include "footer.php";
+include "includes/footer.php";
 ?>

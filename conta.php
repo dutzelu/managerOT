@@ -1,7 +1,7 @@
-<?php
+﻿<?php
 $titlu_pg = "TABEL donații";
 // Asigură-te că "header.php" a fost actualizat pentru a folosi Bootstrap 5 și Bootstrap Icons
-include "header.php";
+include "includes/header.php";
 
 setlocale(LC_ALL, 'ro_RO');
 
@@ -27,7 +27,7 @@ while ($rand = mysqli_fetch_assoc($rezultate_ani)) {
 <div class="container">
     <div class="row">
         <div class="col-md-3 d-none d-md-block">          
-            <?php include "sidebar.php";?>
+            <?php include "includes/sidebar.php";?>
         </div>
 
         <div class="col-12 col-md-9">
@@ -185,4 +185,4 @@ while ($date = mysqli_fetch_assoc($result)){
         
     });
 </script>
-<?php include "footer.php"; ?>
+<?php include "includes/footer.php"; ?>

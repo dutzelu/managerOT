@@ -1,5 +1,5 @@
-<?php
-include "header.php";
+﻿<?php
+include "includes/header.php";
 
 if (isset($_GET['id'])) {
     $id = $_GET['id'];

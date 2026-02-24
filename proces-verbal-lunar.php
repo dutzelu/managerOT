@@ -1,6 +1,6 @@
-<?php
+﻿<?php
 
-include 'header.php';
+include 'includes/header.php';
 
 // începe obiectul care adună tot conțintul html într-un pdf
 ob_start();

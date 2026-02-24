@@ -1,8 +1,8 @@
-<?php
+﻿<?php
 // Asigură-te că sesiunea este pornită dacă folosești o verificare de autentificare
 // session_start(); 
 
-include "header.php"; 
+include "includes/header.php"; 
 
 
 if (isset($_GET['id']) && is_numeric($_GET['id'])) {

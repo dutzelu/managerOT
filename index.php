@@ -1,6 +1,6 @@
-<?php 
+﻿<?php 
 $titlu_pg = "Tablou de Bord (Dashboard) - Statistici Donații";
-include "header.php";
+include "includes/header.php";
 
 // --- LOGICA PHP PENTRU EXTRAGEREA DATELOR ---
 
@@ -112,7 +112,7 @@ $sume_top_json = json_encode($sume_top);
 <div class="container">
     <div class="row">
         <div class="col-md-3 d-none d-md-block">          
-            <?php include "sidebar.php";?>
+            <?php include "includes/sidebar.php";?>
         </div>
 
         <div class="col-12 col-md-9">
@@ -346,5 +346,5 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <?php 
-include "footer.php";
+include "includes/footer.php";
 ?>

@@ -1,7 +1,7 @@
-<?php
+﻿<?php
 // view-campanie.php - Vizualizare Detalii Campanie
 // Include conexiunea la baza de date ($conn)
-include "header.php";
+include "includes/header.php";
 
 $id = $_GET['id'] ?? null;
 $campanie = null;
@@ -12,7 +12,7 @@ $titlu_pg = "Detalii Campanie";
 // 1. Validare ID
 if (empty($id) || !is_numeric($id)) {
     echo '<div class="container mt-4"><div class="alert alert-danger">ID-ul campaniei lipsește sau este invalid.</div></div>';
-    include "footer.php";
+    include "includes/footer.php";
     exit();
 }
 
@@ -39,7 +39,7 @@ $stmt->close();
 <div class="container">
     <div class="row">
         <div class="col-md-3 d-none d-md-block">          
-            <?php include "sidebar.php";?>
+            <?php include "includes/sidebar.php";?>
         </div>
 
         <div class="col-12 col-md-9">
@@ -145,5 +145,5 @@ function confirmDelete(id, nume) {
 </script>
 
 <?php 
-include "footer.php";
+include "includes/footer.php";
 ?>

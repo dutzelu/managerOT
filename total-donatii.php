@@ -1,6 +1,6 @@
-<?php
+﻿<?php
 $titlu_pg = "Toate donațiile";
-include "header.php"; // Include conexiunea si jQuery
+include "includes/header.php"; // Include conexiunea si jQuery
 
 setlocale(LC_ALL, 'ro_RO');
 
@@ -60,7 +60,7 @@ while ($data_total = mysqli_fetch_assoc($result_total)) {
 <div class="container">
     <div class="row">
         <div class="col-md-3 d-none d-md-block">          
-            <?php include "sidebar.php";?>
+            <?php include "includes/sidebar.php";?>
         </div>
 
         <div class="col-12 col-md-9">
@@ -271,7 +271,7 @@ echo "  target.scrollIntoView({ behavior: 'smooth', block: 'center' });";
 echo "});";
 echo "</script>";
 
-include "footer.php";
+include "includes/footer.php";
 
 
 /**

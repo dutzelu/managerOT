@@ -1,6 +1,6 @@
-<?php
+﻿<?php
 $titlu_pg = "Pelerinaje";
-include "../header.php";
+include "../includes/header.php";
 
 // Interogare pentru a obține toate pelerinajele
 $query = "SELECT p.*, 
@@ -20,7 +20,7 @@ $result = mysqli_query($conn, $query);
 <div class="container">
     <div class="row">
         <div class="col-md-3 d-none d-md-block">          
-            <?php include "../sidebar.php";?>
+            <?php include "../includes/sidebar.php";?>
         </div>
 
         <div class="col-12 col-md-9">
@@ -139,4 +139,4 @@ $result = mysqli_query($conn, $query);
     </div>
 </div>
 
-<?php include "../footer.php"; ?>
+<?php include "../includes/footer.php"; ?>
