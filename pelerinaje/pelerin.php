@@ -309,8 +309,12 @@ $stmt->close();
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="ultima_vizita_israel" class="form-label">Ultima vizită în Israel (an)</label>
-                                <input type="number" class="form-control" id="ultima_vizita_israel" name="ultima_vizita_israel" 
-                                       min="1900" max="2026" value="<?php echo $pelerin['ultima_vizita_israel']; ?>">
+                                <select class="form-select" id="ultima_vizita_israel" name="ultima_vizita_israel">
+                                    <option value="Nu am fost" <?php echo ($pelerin['ultima_vizita_israel'] == 'Nu am fost' || empty($pelerin['ultima_vizita_israel'])) ? 'selected' : ''; ?>>Nu am fost</option>
+                                    <?php for($y = 2026; $y >= 1960; $y--): ?>
+                                    <option value="<?php echo $y; ?>" <?php echo ($pelerin['ultima_vizita_israel'] == $y) ? 'selected' : ''; ?>><?php echo $y; ?></option>
+                                    <?php endfor; ?>
+                                </select>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="aplicat_viza" class="form-label">Aplicat viză lucru/locuire/studiu?</label>

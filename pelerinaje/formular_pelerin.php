@@ -53,9 +53,22 @@ if(isset($_POST["submit"])) {
     // Validări de bază
     if(empty($nume)) $errori[] = "Numele este obligatoriu.";
     if(empty($prenume)) $errori[] = "Prenumele este obligatoriu.";
+    if(empty($nume_mama)) $errori[] = "Numele mamei este obligatoriu.";
+    if(empty($prenume_mama)) $errori[] = "Prenumele mamei este obligatoriu.";
+    if(empty($nume_tata)) $errori[] = "Numele tatălui este obligatoriu.";
+    if(empty($prenume_tata)) $errori[] = "Prenumele tatălui este obligatoriu.";
     if(empty($data_nasterii)) $errori[] = "Data nașterii este obligatorie.";
+    if(empty($stare_civila)) $errori[] = "Starea civilă este obligatorie.";
     if(empty($telefon)) $errori[] = "Telefonul este obligatoriu.";
+    if(empty($email)) $errori[] = "Email-ul este obligatoriu.";
+    if(empty($tara_domiciliu)) $errori[] = "Țara domiciliului este obligatorie.";
+    if(empty($oras_domiciliu)) $errori[] = "Orașul domiciliului este obligatoriu.";
+    if(empty($telefon_persoana_apropiata)) $errori[] = "Telefonul persoanei apropiate este obligatoriu.";
+    if(empty($ocupatie)) $errori[] = "Ocupația este obligatorie.";
     if(empty($pelerinaj_id)) $errori[] = "Trebuie să selectați un pelerinaj.";
+    if(!isset($_FILES['upload_pasaport']) || $_FILES['upload_pasaport']['error'] != 0) {
+        $errori[] = "Copia pașaportului este obligatorie.";
+    }
     
     // Upload pașaport
     $upload_pasaport_path = null;
@@ -174,6 +187,14 @@ $pelerinaje_result = mysqli_query($conn, $pelerinaje_query);
             content: " *";
             color: red;
         }
+        @media (max-width: 576px) {
+            .form-container {
+                padding: 20px 15px;
+            }
+            body {
+                padding: 15px 0;
+            }
+        }
     </style>
 </head>
 <body>
@@ -235,6 +256,15 @@ $pelerinaje_result = mysqli_query($conn, $pelerinaje_query);
                 </select>
             </div>
 
+
+            <div class="row">
+                <p>
+                    Vă rog completați toate câmpurile cu atenție și corectitudine.  <b>Datele dvs. vor fi folosite pentru obținerea unei autorizații electronice de călătorie (Electronic Travel Authorization – ETA-IL) în Israel. </b></p>
+                <p>
+                    <b>Fotografia pașaportului trebuie să fie clară</b> și să conțină toate cele 4 colțuri ale paginii cu fotografia și datele personale vizibile. Asigurați-vă că încărcați un fișier în format JPEG sau PNG, cu o dimensiune maximă de 10MB.
+                </p>
+            </div>
+
             <!-- Date Personale -->
             <h5 class="section-title"><i class="bi bi-person-fill me-2"></i>Date personale</h5>
             
@@ -253,27 +283,27 @@ $pelerinaje_result = mysqli_query($conn, $pelerinaje_query);
 
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label for="nume_mama" class="form-label">Nume mamă</label>
+                    <label for="nume_mama" class="form-label required-field">Nume mamă</label>
                     <input type="text" class="form-control" id="nume_mama" name="nume_mama" 
-                           value="<?php echo isset($_POST['nume_mama']) ? htmlspecialchars($_POST['nume_mama']) : ''; ?>">
+                           value="<?php echo isset($_POST['nume_mama']) ? htmlspecialchars($_POST['nume_mama']) : ''; ?>" required>
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label for="prenume_mama" class="form-label">Prenume mamă</label>
+                    <label for="prenume_mama" class="form-label required-field">Prenume mamă</label>
                     <input type="text" class="form-control" id="prenume_mama" name="prenume_mama" 
-                           value="<?php echo isset($_POST['prenume_mama']) ? htmlspecialchars($_POST['prenume_mama']) : ''; ?>">
+                           value="<?php echo isset($_POST['prenume_mama']) ? htmlspecialchars($_POST['prenume_mama']) : ''; ?>" required>
                 </div>
             </div>
 
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label for="nume_tata" class="form-label">Nume tată</label>
+                    <label for="nume_tata" class="form-label required-field">Nume tată</label>
                     <input type="text" class="form-control" id="nume_tata" name="nume_tata" 
-                           value="<?php echo isset($_POST['nume_tata']) ? htmlspecialchars($_POST['nume_tata']) : ''; ?>">
+                           value="<?php echo isset($_POST['nume_tata']) ? htmlspecialchars($_POST['nume_tata']) : ''; ?>" required>
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label for="prenume_tata" class="form-label">Prenume tată</label>
+                    <label for="prenume_tata" class="form-label required-field">Prenume tată</label>
                     <input type="text" class="form-control" id="prenume_tata" name="prenume_tata" 
-                           value="<?php echo isset($_POST['prenume_tata']) ? htmlspecialchars($_POST['prenume_tata']) : ''; ?>">
+                           value="<?php echo isset($_POST['prenume_tata']) ? htmlspecialchars($_POST['prenume_tata']) : ''; ?>" required>
                 </div>
             </div>
 
@@ -284,8 +314,8 @@ $pelerinaje_result = mysqli_query($conn, $pelerinaje_query);
                            value="<?php echo isset($_POST['data_nasterii']) ? $_POST['data_nasterii'] : ''; ?>" required>
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label for="stare_civila" class="form-label">Stare civilă</label>
-                    <select class="form-select" id="stare_civila" name="stare_civila">
+                    <label for="stare_civila" class="form-label required-field">Stare civilă</label>
+                    <select class="form-select" id="stare_civila" name="stare_civila" required>
                         <option value="">Selectează...</option>
                         <option value="casatorit" <?php echo (isset($_POST['stare_civila']) && $_POST['stare_civila'] == 'casatorit') ? 'selected' : ''; ?>>Căsătorit</option>
                         <option value="necasatorit" <?php echo (isset($_POST['stare_civila']) && $_POST['stare_civila'] == 'necasatorit') ? 'selected' : ''; ?>>Necăsătorit</option>
@@ -305,38 +335,38 @@ $pelerinaje_result = mysqli_query($conn, $pelerinaje_query);
                            value="<?php echo isset($_POST['telefon']) ? htmlspecialchars($_POST['telefon']) : ''; ?>" required>
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label for="email" class="form-label">Email</label>
+                    <label for="email" class="form-label required-field">Email</label>
                     <input type="email" class="form-control" id="email" name="email" 
-                           value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email']) : ''; ?>">
+                           value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email']) : ''; ?>" required>
                 </div>
             </div>
 
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label for="tara_domiciliu" class="form-label">Țara domiciliu</label>
+                    <label for="tara_domiciliu" class="form-label required-field">Țara domiciliu</label>
                     <input type="text" class="form-control" id="tara_domiciliu" name="tara_domiciliu" 
-                           value="<?php echo isset($_POST['tara_domiciliu']) ? htmlspecialchars($_POST['tara_domiciliu']) : ''; ?>">
+                           value="<?php echo isset($_POST['tara_domiciliu']) ? htmlspecialchars($_POST['tara_domiciliu']) : ''; ?>" required>
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label for="oras_domiciliu" class="form-label">Oraș domiciliu</label>
+                    <label for="oras_domiciliu" class="form-label required-field">Oraș domiciliu</label>
                     <input type="text" class="form-control" id="oras_domiciliu" name="oras_domiciliu" 
-                           value="<?php echo isset($_POST['oras_domiciliu']) ? htmlspecialchars($_POST['oras_domiciliu']) : ''; ?>">
+                           value="<?php echo isset($_POST['oras_domiciliu']) ? htmlspecialchars($_POST['oras_domiciliu']) : ''; ?>" required>
                 </div>
             </div>
 
             <div class="mb-3">
-                <label for="telefon_persoana_apropiata" class="form-label">Telefon persoană apropiată (urgență)</label>
+                <label for="telefon_persoana_apropiata" class="form-label required-field">Telefon persoană apropiată (urgență)</label>
                 <input type="tel" class="form-control" id="telefon_persoana_apropiata" name="telefon_persoana_apropiata" 
-                       value="<?php echo isset($_POST['telefon_persoana_apropiata']) ? htmlspecialchars($_POST['telefon_persoana_apropiata']) : ''; ?>">
+                       value="<?php echo isset($_POST['telefon_persoana_apropiata']) ? htmlspecialchars($_POST['telefon_persoana_apropiata']) : ''; ?>" required>
             </div>
 
             <!-- Informații Profesionale -->
             <h5 class="section-title"><i class="bi bi-briefcase-fill me-2"></i>Informații profesionale</h5>
 
             <div class="mb-3">
-                <label for="ocupatie" class="form-label">Ocupație (dacă nu aveți scrieți "fără ocupație")</label>
+                <label for="ocupatie" class="form-label required-field">Ocupație (dacă nu aveți scrieți "fără ocupație")</label>
                 <input type="text" class="form-control" id="ocupatie" name="ocupatie" 
-                       value="<?php echo isset($_POST['ocupatie']) ? htmlspecialchars($_POST['ocupatie']) : ''; ?>">
+                       value="<?php echo isset($_POST['ocupatie']) ? htmlspecialchars($_POST['ocupatie']) : ''; ?>" required>
             </div>
 
             <div class="row">
@@ -358,9 +388,12 @@ $pelerinaje_result = mysqli_query($conn, $pelerinaje_query);
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label for="ultima_vizita_israel" class="form-label">În ce an ați fost ultima dată în Israel?</label>
-                    <input type="number" class="form-control" id="ultima_vizita_israel" name="ultima_vizita_israel" 
-                           min="1900" max="2026" placeholder="ex: 2020"
-                           value="<?php echo isset($_POST['ultima_vizita_israel']) ? $_POST['ultima_vizita_israel'] : ''; ?>">
+                    <select class="form-select" id="ultima_vizita_israel" name="ultima_vizita_israel">
+                        <option value="Nu am fost" <?php echo (!isset($_POST['ultima_vizita_israel']) || $_POST['ultima_vizita_israel'] == 'Nu am fost') ? 'selected' : ''; ?>>Nu am fost</option>
+                        <?php for($y = 2026; $y >= 1960; $y--): ?>
+                        <option value="<?php echo $y; ?>" <?php echo (isset($_POST['ultima_vizita_israel']) && $_POST['ultima_vizita_israel'] == $y) ? 'selected' : ''; ?>><?php echo $y; ?></option>
+                        <?php endfor; ?>
+                    </select>
                 </div>
                 <div class="col-md-6 mb-3">
                     <label for="aplicat_viza" class="form-label">Ați aplicat pentru viză de lucru, locuire sau studiu în Israel?</label>
@@ -375,25 +408,31 @@ $pelerinaje_result = mysqli_query($conn, $pelerinaje_query);
             <h5 class="section-title"><i class="bi bi-file-earmark-text-fill me-2"></i>Documente și plată</h5>
 
             <div class="mb-3">
-                <label for="upload_pasaport" class="form-label">Încarcă Copie Pașaport (PDF, JPEG, PNG - max 10MB)</label>
-                <input type="file" class="form-control" id="upload_pasaport" name="upload_pasaport" accept=".pdf,.jpg,.jpeg,.png">
+                <label class="form-label required-field">Încarcă Copie Pașaport (PDF, JPEG, PNG - max 10MB)</label>
+                <div class="input-group">
+                    <label class="btn btn-outline-secondary mb-0" for="upload_pasaport">
+                        <i class="bi bi-upload me-1"></i>Alege fotografie
+                    </label>
+                    <input type="file" class="d-none" id="upload_pasaport" name="upload_pasaport" accept=".pdf,.jpg,.jpeg,.png">
+                    <span class="form-control text-muted" id="file_name_display">Niciun fișier ales</span>
+                </div>
             </div>
 
             <div class="row">
                 <div class="col-md-4 mb-3">
-                    <label for="plata_euro" class="form-label">Câți ați plătit în euro până acum</label>
+                    <label for="plata_euro" class="form-label">Total euro plătit până acum</label>
                     <input type="number" step="0.01" class="form-control" id="plata_euro" name="plata_euro" 
                            value="<?php echo isset($_POST['plata_euro']) ? $_POST['plata_euro'] : '0'; ?>">
                 </div>
                 <div class="col-md-4 mb-3">
-                    <label for="plata_dolari" class="form-label">Câți ați plătit în dolari până acum</label>
+                    <label for="plata_dolari" class="form-label">Total dolari plătit până acum</label>
                     <input type="number" step="0.01" class="form-control" id="plata_dolari" name="plata_dolari" 
                            value="<?php echo isset($_POST['plata_dolari']) ? $_POST['plata_dolari'] : '0'; ?>">
                 </div>
                 <div class="col-md-4 mb-3">
                     <label for="cu_sau_fara_avion" class="form-label">Călătoriți cu avion cu grupul sau separat?</label>
                     <select class="form-select" id="cu_sau_fara_avion" name="cu_sau_fara_avion">
-                        <option value="cu avion" <?php echo (isset($_POST['cu_sau_fara_avion']) && $_POST['cu_sau_fara_avion'] == 'cu grupyl') ? 'selected' : 'selected'; ?>>Cu grupul</option>
+                        <option value="cu avion" <?php echo (isset($_POST['cu_sau_fara_avion']) && $_POST['cu_sau_fara_avion'] == 'cu grupul') ? 'selected' : 'selected'; ?>>Cu grupul</option>
                         <option value="fara avion" <?php echo (isset($_POST['cu_sau_fara_avion']) && $_POST['cu_sau_fara_avion'] == 'separat') ? 'selected' : ''; ?>>Separat</option>
                     </select>
                 </div>
@@ -427,6 +466,13 @@ $pelerinaje_result = mysqli_query($conn, $pelerinaje_query);
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.getElementById('upload_pasaport').addEventListener('change', function() {
+    var display = document.getElementById('file_name_display');
+    display.textContent = this.files[0] ? this.files[0].name : 'Niciun fișier ales';
+    display.classList.toggle('text-muted', !this.files[0]);
+});
+</script>
 <script>
 setTimeout(function() {
     var alerts = document.querySelectorAll('.alert');
