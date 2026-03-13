@@ -1,0 +1,813 @@
+/* =========================================================
+   Casa Justin Pârvu – Donations Page
+   Stripe-inspired: white · grey · blue, clean system fonts
+   ========================================================= */
+
+/* ── Force font on ALL descendants (overrides Themify <code> wrapper) ── */
+.cjp-donations-page,
+.cjp-donations-page *,
+.cjp-donations-page code {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+               "Helvetica Neue", Arial, sans-serif !important;
+  font-size: 24px;
+  box-sizing: border-box;
+}
+
+/* ── Reset & Variables ──────────────────────────────────── */
+.cjp-donations-page {
+  --blue:        #0570de;
+  --blue-dark:   #0259b5;
+  --blue-pale:   #eff6ff;
+  --blue-border: #bfdbfe;
+  --text:        #0f172a;
+  --muted:       #64748b;
+  --border:      #e2e8f0;
+  --card:        #ffffff;
+  --bg:          #f8fafc;
+  --bg2:         #f1f5f9;
+  --green:       #16a34a;
+  --shadow-sm:   0 1px 3px rgba(15,23,42,.08), 0 1px 2px rgba(15,23,42,.06);
+  --shadow-md:   0 4px 6px rgba(15,23,42,.07), 0 2px 4px rgba(15,23,42,.06);
+  --shadow-lg:   0 10px 24px rgba(15,23,42,.10), 0 4px 8px rgba(15,23,42,.06);
+  --r:           12px;
+
+  margin: 0 auto;
+  padding: 0 0 80px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+               "Helvetica Neue", Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+/* ── Hero ───────────────────────────────────────────────── */
+.cjp-hero {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 0 0 36px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-md);
+  position: relative;
+  overflow: hidden;
+}
+
+.cjp-hero-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 100%;
+  object-fit: cover;
+  object-position: center;
+  border-radius: var(--r) var(--r) 0 0;
+  margin-bottom: 28px;
+}
+
+.cjp-hero h1,
+.cjp-hero .cjp-subtitle,
+.cjp-hero .cjp-security-banner,
+.cjp-hero .cjp-payment-logos {
+  padding-left: 40px;
+  padding-right: 40px;
+}
+
+.cjp-hero::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--blue) 0%, #38bdf8 100%);
+  border-radius: var(--r) var(--r) 0 0;
+}
+
+.cjp-hero h1 {
+  margin: 0 0 8px;
+  font-size: clamp(1.7rem, 3vw, 2.4rem);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+  color: var(--text);
+}
+
+.cjp-hero h1 span {
+  color: var(--blue);
+  font-size: inherit;
+}
+
+.cjp-subtitle {
+  margin: 0 0 28px;
+  font-size: 1rem;
+  color: var(--muted);
+}
+
+/* ── Security banner ────────────────────────────────────── */
+.cjp-security-banner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  background: var(--blue-pale);
+  border: 1px solid var(--blue-border);
+  border-radius: var(--r);
+  margin-bottom: 20px;
+}
+
+.cjp-security-icon {
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  border-radius: 50%;
+  background: #dbeafe;
+  border: 1px solid var(--blue-border);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.cjp-security-text {
+  flex: 1;
+}
+
+.cjp-security-banner strong {
+  display: block;
+  font-size: 0.93rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.cjp-security-banner p {
+  margin: 2px 0 0;
+  font-size: 0.83rem;
+  color: var(--muted);
+}
+
+.cjp-stripe-badge {
+  display: block;
+  height: 32px;
+  width: auto;
+  object-fit: contain;
+  opacity: 0.85;
+  margin-left: auto;
+}
+
+/* ── Payment logos ──────────────────────────────────────── */
+.cjp-payment-logos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 28px;
+}
+
+.cjp-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  padding: 5px 12px;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  background: var(--card);
+  box-shadow: var(--shadow-sm);
+}
+
+.cjp-logo-img {
+  padding: 6px 14px;
+  min-height: 56px;
+}
+
+.cjp-logo-img img {
+  display: block;
+  width: auto;
+  height: 36px;
+  max-width: 100px;
+  object-fit: contain;
+  object-position: center;
+}
+
+/* ── Goals grid ─────────────────────────────────────────── */
+.cjp-goals-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.cjp-goal-item {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+
+.cjp-goal-item span {
+  display: block;
+  font-size: 1.25rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: -1px;
+  color: var(--muted);
+  margin-bottom: 6px;
+  line-height: 1.7rem;
+}
+
+.cjp-goal-item strong {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.cjp-goal-total {
+  background: var(--blue-pale);
+  border-color: var(--blue-border);
+}
+
+.cjp-goal-total strong {
+  color: var(--blue);
+}
+
+/* ── Progress wrap ──────────────────────────────────────── */
+.cjp-main-progress-wrap {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px 20px 20px;
+}
+
+.cjp-main-progress-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.cjp-main-progress-meta span {
+  font-size: 1.4rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+.cjp-main-progress-meta strong {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.cjp-progress-pill {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 58px;
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #fff!important;
+  background: var(--blue);
+}
+
+.cjp-progress {
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--bg2);
+  overflow: hidden;
+}
+
+.cjp-progress-bar {
+  height: 100%;
+  width: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--blue) 0%, #38bdf8 100%);
+  transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── Section cards ──────────────────────────────────────── */
+.cjp-section {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 32px 32px 28px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+.cjp-section h2 {
+  margin: 0 0 20px;
+  font-size: 1.8rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: var(--blue);
+}
+
+/* ── Donation cards grid ────────────────────────────────── */
+.cjp-cards-grid,
+.cjp-materials-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.cjp-materials-grid {
+  grid-template-columns: 1fr;
+}
+
+/* ── Individual donation card ───────────────────────────── */
+.cjp-card {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  background: var(--card);
+  padding: 22px 20px 20px;
+  transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+
+.cjp-card:hover {
+  border-color: #93c5fd;
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+}
+
+.cjp-card-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.cjp-card-icon {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 19px;
+  background: var(--blue-pale);
+  border: 1px solid var(--blue-border);
+}
+
+.cjp-card h3 {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 600 !important;
+  color: var(--text);
+  line-height: 1.4;
+}
+
+.cjp-card p {
+  flex: 1;
+  color: var(--muted);
+  margin: 0 0 14px;
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+
+.cjp-price {
+  font-size: 1.55rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  margin-bottom: 16px;
+  line-height: 1;
+}
+
+/* ── CTA button ─────────────────────────────────────────── */
+.cjp-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  min-height: 46px;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-size: 0.93rem;
+  font-weight: 600;
+  text-decoration: none;
+  color: #fff;
+  background: var(--blue);
+  box-shadow: 0 1px 2px rgba(5,112,222,.30), 0 4px 12px rgba(5,112,222,.22);
+  transition: background .18s ease, box-shadow .18s ease, transform .18s ease;
+  letter-spacing: 0.01em;
+}
+
+.cjp-btn:hover,
+.cjp-btn:focus {
+  color: #fff;
+  background: var(--blue-dark);
+  box-shadow: 0 1px 2px rgba(5,112,222,.35), 0 6px 16px rgba(5,112,222,.30);
+  transform: translateY(-1px);
+  outline: none;
+}
+
+/* ── Cancel info ────────────────────────────────────────── */
+.cjp-cancel-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 18px;
+  padding: 14px 16px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.cjp-cancel-icon {
+  font-size: 16px;
+  line-height: 1.6;
+  flex-shrink: 0;
+}
+
+.cjp-cancel-info p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text);
+  line-height: 1.6;
+}
+
+.cjp-cancel-info strong {
+  color: var(--text);
+  font-weight: 400;
+  font-size: inherit;
+}
+
+/* ── Material card ──────────────────────────────────────── */
+.cjp-material-card {
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  background: var(--card);
+  padding: 18px 20px;
+  transition: border-color .18s ease, box-shadow .18s ease;
+}
+
+.cjp-material-card:hover {
+  border-color: #93c5fd;
+  box-shadow: var(--shadow-md);
+}
+
+.cjp-material-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.cjp-material-header h3 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.cjp-material-header strong {
+  font-size: inherit;
+  color: var(--muted);
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.cjp-material-card .cjp-progress {
+  height: 6px;
+}
+
+/* ── Recent donations ───────────────────────────────────── */
+.cjp-recent-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.cjp-recent-item {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 13px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  background: var(--card);
+  transition: border-color .15s ease;
+}
+
+.cjp-recent-item:hover {
+  border-color: #93c5fd;
+}
+
+.cjp-recent-donor {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cjp-recent-donor strong {
+  font-size: 0.93rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.cjp-recent-date {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.cjp-recent-amount {
+  font-size: 0.93rem;
+  font-weight: 700;
+  color: var(--green);
+  white-space: nowrap;
+}
+
+.cjp-empty {
+  text-align: center;
+  color: var(--muted);
+  padding: 16px 0;
+  margin: 0;
+  font-size: 0.92rem;
+}
+
+/* ── Bank accounts ──────────────────────────────────────── */
+.cjp-bank-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.cjp-bank-item {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cjp-bank-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+.cjp-bank-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cjp-bank-item strong {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--text);
+  word-break: break-all;
+  flex: 1;
+}
+
+.cjp-copy-btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--card);
+  color: var(--muted);
+  cursor: pointer;
+  transition: color .15s, border-color .15s, background .15s;
+  padding: 0;
+}
+
+.cjp-copy-btn:hover {
+  color: var(--blue);
+  border-color: var(--blue-border);
+  background: var(--blue-pale);
+}
+
+.cjp-copy-btn.cjp-copy-ok {
+  color: var(--green);
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+}
+
+/* ── Formular230 button override ────────────────────────── */
+.cjp-donations-page .f230ro-buton,
+.cjp-donations-page .f230ro-lansare {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 46px !important;
+  border-radius: 8px !important;
+  padding: 12px 24px !important;
+  font-size: 0.93rem !important;
+  font-weight: 600 !important;
+  color: #fff !important;
+  background: var(--blue) !important;
+  box-shadow: 0 1px 2px rgba(5,112,222,.30), 0 4px 12px rgba(5,112,222,.22) !important;
+  border: none !important;
+  cursor: pointer !important;
+  text-decoration: none !important;
+  transition: background .18s ease, box-shadow .18s ease, transform .18s ease !important;
+  letter-spacing: 0.01em !important;
+}
+
+.cjp-donations-page .f230ro-buton:hover,
+.cjp-donations-page .f230ro-lansare:hover {
+  background: var(--blue-dark) !important;
+  box-shadow: 0 1px 2px rgba(5,112,222,.35), 0 6px 16px rgba(5,112,222,.30) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* ── Redirect sections ──────────────────────────────────── */
+.cjp-redirect-section p {
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: var(--text);
+  margin: 0 0 12px;
+}
+
+.cjp-redirect-section p:last-of-type {
+  margin-bottom: 0;
+}
+
+.cjp-redirect-intro {
+  font-size: 0.95rem;
+  margin-bottom: 12px;
+}
+
+.cjp-redirect-btn-wrap {
+  margin-top: 20px;
+}
+
+.cjp-btn-blue {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-size: 0.93rem;
+  font-weight: 600;
+  text-decoration: none;
+  color: #fff;
+  background: var(--blue);
+  box-shadow: 0 1px 2px rgba(5,112,222,.30), 0 4px 12px rgba(5,112,222,.22);
+  transition: background .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+
+.cjp-btn-blue:hover,
+.cjp-btn-blue:focus {
+  color: #fff;
+  background: var(--blue-dark);
+  box-shadow: 0 1px 2px rgba(5,112,222,.35), 0 6px 16px rgba(5,112,222,.30);
+  transform: translateY(-1px);
+  outline: none;
+}
+
+/* ── Responsive ─────────────────────────────────────────── */
+
+@media (max-width: 640px) {
+  /* Fonturi mai mici pe mobil */
+  .cjp-donations-page,
+  .cjp-donations-page *,
+  .cjp-donations-page code {
+    font-size: 16px;
+  }
+
+  .cjp-hero h1 {
+    font-size: 1.6rem;
+  }
+
+  .cjp-section h2 {
+    font-size: 1.1rem;
+  }
+
+  .cjp-card h3 {
+    font-size: 1.1rem !important;
+  }
+
+  .cjp-price {
+    font-size: 1.3rem;
+  }
+
+  .cjp-goal-item span {
+    font-size: 0.75rem;
+    line-height: 1.2;
+    letter-spacing: 0;
+  }
+
+  .cjp-goal-item strong {
+    font-size: 1rem;
+  }
+
+  .cjp-main-progress-meta strong {
+    font-size: 1rem;
+  }
+
+  .cjp-material-header h3 {
+    font-size: 1rem;
+  }
+
+  /* Padding redus pe mobil */
+  .cjp-donations-page {
+    padding: 0 10px 48px;
+  }
+
+  .cjp-hero {
+    padding: 0 0 18px;
+    border-radius: 10px;
+  }
+
+  .cjp-hero h1,
+  .cjp-hero .cjp-subtitle,
+  .cjp-hero .cjp-security-banner,
+  .cjp-hero .cjp-payment-logos {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .cjp-section {
+    padding: 18px 16px;
+    border-radius: 10px;
+  }
+
+
+  .cjp-goal-item {
+    padding: 10px 12px;
+  }
+
+  .cjp-logo-img img {
+    height: 22px;
+    max-width: 70px;
+  }
+
+  .cjp-logo-img {
+    padding: 4px 10px;
+    min-height: 38px;
+  }
+
+  .cjp-stripe-badge {
+    height: 22px;
+  }
+
+  .cjp-security-banner {
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .cjp-security-text {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .cjp-cards-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cjp-main-progress-meta {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .cjp-progress-pill {
+    margin-left: 0;
+  }
+
+  .cjp-material-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .cjp-recent-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .cjp-recent-amount {
+    align-self: flex-start;
+  }
+
+  .cjp-bank-grid {
+    grid-template-columns: 1fr;
+  }
+}
