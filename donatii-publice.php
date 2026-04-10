@@ -34,7 +34,7 @@ $sql_detalii = "
     FROM donatii d
     LEFT JOIN asistati_social a ON d.id_asistat = a.id
     WHERE d.data >= DATE_SUB(NOW(), INTERVAL 1 YEAR)
-    ORDER BY d.id DESC
+    ORDER BY d.data DESC, d.id DESC
 ";
 $result_detalii = mysqli_query($conn, $sql_detalii);
 

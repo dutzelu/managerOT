@@ -43,6 +43,7 @@
     const totals = stats.totals || {};
     const materials = stats.materials || {};
 
+    // Pagina completă
     const eurText = document.getElementById('cjp-eur-progress-text');
     const eurBar = document.getElementById('cjp-eur-progress-bar');
     const eurPill = document.getElementById('cjp-eur-progress-pill');
@@ -56,6 +57,7 @@
       eurPill.textContent = formatNumber(totals.percent || 0, 1) + '%';
     }
     setProgressBar(eurBar, totals.percent || 0);
+
 
     Object.keys(materials).forEach(function (key) {
       const item = materials[key] || {};
@@ -106,5 +108,6 @@
         });
       });
     });
+
   });
 })();

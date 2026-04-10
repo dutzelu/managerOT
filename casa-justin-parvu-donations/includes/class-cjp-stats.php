@@ -200,7 +200,14 @@ class CJP_Stats
 
         $material_progress = [];
         foreach ($material_targets as $type => $target_config) {
-            $current = (float) ($material_totals[$type] ?? 0);
+            $db_current = (float) ($material_totals[$type] ?? 0);
+
+            $manual_current = 0.0;
+            if (class_exists('CJP_Admin')) {
+                $manual_current = CJP_Admin::get_material_current($type);
+            }
+
+            $current = $manual_current > 0 ? $manual_current : $db_current;
             $target = (float) ($target_config['target'] ?? 0);
             $percent = $target > 0 ? min(100, ($current / $target) * 100) : 0;
 

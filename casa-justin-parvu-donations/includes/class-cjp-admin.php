@@ -113,6 +113,37 @@ class CJP_Admin
                 ]
             );
         }
+
+        add_settings_section(
+            'cjp_section_materials',
+            'Progres materiale (valori actuale)',
+            [self::class, 'render_materials_section_intro'],
+            'cjp-donations'
+        );
+
+        $materials_fields = [
+            'beton_fundatie'       => 'Beton fundație (m³)',
+            'beton_suprastructura' => 'Beton suprastructură (m³)',
+            'bca'                  => 'BCA ziduri (m³)',
+            'manopera'             => 'Manoperă (EUR)',
+            'lemn_acoperis'        => 'Lemn acoperiș (m³)',
+        ];
+
+        foreach ($materials_fields as $key => $label) {
+            add_settings_field(
+                'material_' . $key,
+                $label,
+                [self::class, 'render_material_field'],
+                'cjp-donations',
+                'cjp_section_materials',
+                ['key' => $key]
+            );
+        }
+    }
+
+    public static function render_materials_section_intro(): void
+    {
+        echo '<p class="description">Setează manual valorile actuale pentru fiecare material. Aceste valori înlocuiesc totalurile calculate automat din donațiile Stripe.</p>';
     }
 
     public static function sanitize_settings($input): array
@@ -136,12 +167,20 @@ class CJP_Admin
             $monthly[$key] = esc_url_raw((string) $raw);
         }
 
+        $material_keys = array_keys(self::get_default_settings()['materials_current']);
+        $materials_current = [];
+        foreach ($material_keys as $key) {
+            $raw = $input['materials_current'][$key] ?? 0;
+            $materials_current[$key] = max(0.0, (float) $raw);
+        }
+
         return [
             'webhook_secret' => $webhook_secret,
             'payment_links' => [
                 'one_time' => $one_time,
                 'monthly' => $monthly,
             ],
+            'materials_current' => $materials_current,
         ];
     }
 
@@ -172,6 +211,11 @@ class CJP_Admin
 
         $settings['webhook_secret'] = sanitize_text_field((string) ($settings['webhook_secret'] ?? ''));
 
+        $settings['materials_current'] = wp_parse_args(
+            is_array($settings['materials_current'] ?? null) ? $settings['materials_current'] : [],
+            $defaults['materials_current']
+        );
+
         return $settings;
     }
 
@@ -185,6 +229,25 @@ class CJP_Admin
     {
         $settings = self::get_settings();
         return (string) ($settings['payment_links'][$group][$key] ?? '#');
+    }
+
+    public static function get_material_current(string $key): float
+    {
+        $settings = self::get_settings();
+        return (float) ($settings['materials_current'][$key] ?? 0.0);
+    }
+
+    public static function render_material_field(array $args): void
+    {
+        $key = (string) ($args['key'] ?? '');
+        $value = self::get_material_current($key);
+
+        printf(
+            '<input type="number" step="0.01" min="0" class="small-text" name="%1$s[materials_current][%2$s]" value="%3$s" />',
+            esc_attr(self::SETTINGS_OPTION),
+            esc_attr($key),
+            esc_attr((string) $value)
+        );
     }
 
     public static function render_settings_page(): void
@@ -268,6 +331,13 @@ class CJP_Admin
                     'monthly_50' => '#',
                     'monthly_100' => '#',
                 ],
+            ],
+            'materials_current' => [
+                'beton_fundatie'       => 0.0,
+                'beton_suprastructura' => 0.0,
+                'bca'                  => 0.0,
+                'manopera'             => 0.0,
+                'lemn_acoperis'        => 0.0,
             ],
         ];
     }
