@@ -21,37 +21,8 @@ if (isset($_POST['submit'])) {
     // Extragem anul din data semnării
     $year = date("Y", strtotime($data_semnarii));
 
-    // 2. Determinăm numărul recurent pentru anul respectiv
-    // Folosim prepared statements pentru interogarea de SELECT, deși nu e strict necesar aici.
-    $query  = "SELECT numar FROM contracte 
-               WHERE RIGHT(numar, 4) = ? 
-               ORDER BY id DESC LIMIT 1";
-    $stmt_select = $conn->prepare($query);
-    
-    if ($stmt_select) {
-        $stmt_select->bind_param("s", $year);
-        $stmt_select->execute();
-        $result = $stmt_select->get_result();
-        
-        $next_serial = 1;
-
-        if ($result && $result->num_rows > 0) {
-            $row = $result->fetch_assoc();
-            $numar_exist = $row['numar'];
-            // Se presupune că formatul stocat este: "AOT" + număr recurent + anul (ex: AOT12025)
-            // Se extrage partea numerică a numărului contractului (între poziția 3 și ultimele 4 caractere)
-            $serial = substr($numar_exist, 3, -4);
-            $next_serial = (int)$serial + 1;
-        }
-        $stmt_select->close();
-    } else {
-        // În caz de eroare la SELECT, putem alege să mergem mai departe cu numărul 1 sau să aruncăm o eroare.
-        // Vom alege să setăm numărul la 1 și să logăm o eroare, dacă este cazul.
-        // Pentru simplitate, nu vom trata eroarea de select aici, presupunând succesul.
-    }
-
-    // Se compune numărul contractului
-    $numar_contract = "AOT" . $next_serial . $year;
+    // 2. Determinăm numărul recurent pentru anul respectiv (funcție din includes/functii.php)
+    $numar_contract = genereaza_numar_contract($conn, $year);
 
     // 3. Inserarea în baza de date
     // Folosim prepared statement pentru inserare

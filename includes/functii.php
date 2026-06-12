@@ -127,7 +127,30 @@ function total_luna ($luna, $an) {
 
     }
 
-// scoate diacriticile 
+// generează următorul număr de contract pentru anul dat (format: AOT + serial + an, ex: AOT52026)
+
+function genereaza_numar_contract($conn, $year) {
+    $next_serial = 1;
+    $query = "SELECT numar FROM contracte
+              WHERE RIGHT(numar, 4) = ?
+              ORDER BY id DESC LIMIT 1";
+    $stmt = $conn->prepare($query);
+    if ($stmt) {
+        $stmt->bind_param("s", $year);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($result && $result->num_rows > 0) {
+            $row = $result->fetch_assoc();
+            // formatul stocat: "AOT" + serial + an (ex: AOT12025)
+            $serial = substr($row['numar'], 3, -4);
+            $next_serial = (int)$serial + 1;
+        }
+        $stmt->close();
+    }
+    return "AOT" . $next_serial . $year;
+}
+
+// scoate diacriticile
 
     function replaceSpecialChars($string){
 
