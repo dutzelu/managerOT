@@ -24,24 +24,44 @@ if (isset($_POST['submit'])) {
     // 2. Determinăm numărul recurent pentru anul respectiv (funcție din includes/functii.php)
     $numar_contract = genereaza_numar_contract($conn, $year);
 
-    // 3. Inserarea în baza de date
+    // 3. Procesare upload PDF (dacă există)
+    $link_final = $link_act_doveditor;
+    if (isset($_FILES['fisier_pdf']) && $_FILES['fisier_pdf']['error'] === UPLOAD_ERR_OK) {
+        $upload_dir = __DIR__ . '/uploads/contracte/';
+        if (!is_dir($upload_dir)) {
+            mkdir($upload_dir, 0755, true);
+        }
+        $finfo = new finfo(FILEINFO_MIME_TYPE);
+        $mime  = $finfo->file($_FILES['fisier_pdf']['tmp_name']);
+        if ($mime === 'application/pdf') {
+            $num_safe    = preg_replace('/[^a-zA-Z0-9_-]/', '_', $numar_contract);
+            $fisier_name = $num_safe . '_' . time() . '.pdf';
+            if (move_uploaded_file($_FILES['fisier_pdf']['tmp_name'], $upload_dir . $fisier_name)) {
+                $link_final = 'uploads/contracte/' . $fisier_name;
+            } else {
+                echo "<div class='alert alert-danger'>Eroare la salvarea fișierului PDF.</div>";
+            }
+        } else {
+            echo "<div class='alert alert-danger'>Fișierul încărcat nu este un PDF valid.</div>";
+        }
+    }
+
+    // 4. Inserarea în baza de date
     // Folosim prepared statement pentru inserare
-    $sql = "INSERT INTO contracte (numar, continut, sponsor, beneficiar, suma, data_semnarii, link_contract) 
+    $sql = "INSERT INTO contracte (numar, continut, sponsor, beneficiar, suma, data_semnarii, link_contract)
             VALUES (?, ?, ?, ?, ?, ?, ?)";
 
     $stmt_insert = $conn->prepare($sql);
-    
+
     if ($stmt_insert) {
-        // Legare parametri: s=string, s=string, s=string, s=string, s=string, s=string, s=string
-        // ATENȚIE: suma este varchar în SQL, deci folosim 's'
-        $stmt_insert->bind_param("sssssss", 
-            $numar_contract, 
-            $continut, // Dacă folosești TinyMCE, asigură-te că valoarea este curată sau folosește test_input()
-            $sponsor, 
-            $beneficiar, 
-            $suma, 
+        $stmt_insert->bind_param("sssssss",
+            $numar_contract,
+            $continut,
+            $sponsor,
+            $beneficiar,
+            $suma,
             $data_semnarii,
-            $link_act_doveditor
+            $link_final
         );
 
         if ($stmt_insert->execute()) {
@@ -123,6 +143,12 @@ if (isset($_POST['submit'])) {
                     <div class="col-md-6">
                         <label for="link_act_doveditor" class="form-label fw-bold">Link Document Contract (URL/Drive):</label>
                         <input name="link_act_doveditor" id="link_act_doveditor" type="url" class="form-control" placeholder="http://">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="fisier_pdf" class="form-label fw-bold">Atașează contract PDF:</label>
+                        <input type="file" name="fisier_pdf" id="fisier_pdf" class="form-control" accept="application/pdf">
+                        <div class="form-text text-muted">Dacă încarci un PDF, acesta va fi prioritizat față de link-ul de mai sus.</div>
                     </div>
 
                     <div class="col-12 mt-4">

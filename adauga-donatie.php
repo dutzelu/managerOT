@@ -22,9 +22,14 @@ if(isset ($_POST["submit"]) ) {
     $data = test_input($_POST['data']);
     $suma_lei = test_input($_POST['suma_lei']);
     $tip_donatie = test_input($_POST['tip_donatie']);
+    $mod_acordare = test_input($_POST['mod_acordare'] ?? '');
     $scop_donatie = test_input($_POST['scop_donatie']);
     $act_doveditor = test_input($_POST['act_doveditor']);
     $nr_act_doveditor = test_input($_POST['nr_act_doveditor']);
+    $cont_beneficiar = test_input($_POST['cont_beneficiar'] ?? '');
+    $numar_ordin_plata = test_input($_POST['numar_ordin_plata'] ?? '');
+    $sursa_fondurilor = test_input($_POST['sursa_fondurilor'] ?? '');
+    $observatii_ajutor = test_input($_POST['observatii_ajutor'] ?? '');
     $link_act = test_input($_POST['link_act']); // Preluare URL-ul din formular
  
     $anul = substr ($data, 0,4);
@@ -79,11 +84,23 @@ if(isset ($_POST["submit"]) ) {
     
     // 3. INSERARE IN BAZA DE DATE (DOAR daca nu sunt erori de upload critice)
     if(empty($upload_errors)) {
-        // ATENTIE: Am inlocuit 'link_ci' din codul vechi cu 'link_act' pentru a folosi numele campului din baza de date
+        $fisa_id = null;
+        $stmt_fisa = $conn->prepare("SELECT id FROM fise_sociale WHERE beneficiar_id = ? ORDER BY id DESC LIMIT 1");
+        if ($stmt_fisa) {
+            $stmt_fisa->bind_param("i", $id_asistat);
+            $stmt_fisa->execute();
+            $result_fisa = $stmt_fisa->get_result();
+            if ($row_fisa = $result_fisa->fetch_assoc()) {
+                $fisa_id = $row_fisa['id'];
+            }
+            $stmt_fisa->close();
+        }
+
+        // Link-ul final poate veni din URL sau din fisierul incarcat.
         $query = "
             INSERT INTO donatii 
-            (`id_asistat`, `suma_lei`, `tip_donatie`, `act_doveditor`, `nr_act_doveditor`, `link_act`, `scop_donatie`, `data`)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+            (`id_asistat`, `fisa_id`, `suma_lei`, `tip_donatie`, `mod_acordare`, `act_doveditor`, `nr_act_doveditor`, `cont_beneficiar`, `numar_ordin_plata`, `sursa_fondurilor`, `link_act`, `scop_donatie`, `data`, `observatii_ajutor`)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
         ";
         
         // Foloseste prepared statement pentru securitate
@@ -91,15 +108,21 @@ if(isset ($_POST["submit"]) ) {
 
         if ($stmt) {
             // Legare parametri: i=integer, d=double, s=string
-            $stmt->bind_param("idssssss", 
+            $stmt->bind_param("iidsssssssssss",
                 $id_asistat, 
+                $fisa_id,
                 $suma_lei, 
                 $tip_donatie, 
+                $mod_acordare,
                 $act_doveditor, 
                 $nr_act_doveditor, 
+                $cont_beneficiar,
+                $numar_ordin_plata,
+                $sursa_fondurilor,
                 $final_link_act, // Foloseste link-ul final (URL sau Cale Fisier)
                 $scop_donatie, 
-                $data
+                $data,
+                $observatii_ajutor
             );
 
             if ($stmt->execute()) {
@@ -174,7 +197,7 @@ $rezultate_asistati = mysqli_query($conn, $sql_asistati);
     
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="mb-0 text-primary">
-            <i class="bi bi-wallet2 me-2"></i> Adaugă o nouă donație
+            <i class="bi bi-wallet2 me-2"></i> Adaugă un ajutor acordat
         </h2>
         
         <a href="total-donatii.php" class="btn btn-outline-secondary btn-sm">
@@ -255,6 +278,18 @@ $rezultate_asistati = mysqli_query($conn, $sql_asistati);
                         <option value="servicii medicale" <?php echo ($selected_tip == 'servicii medicale') ? 'selected' : ''; ?>>servicii medicale</option>
                     </select>
                 </div>
+
+                <div class="col-md-6">
+                    <label for="mod_acordare" class="form-label fw-bold">Mod acordare:</label>
+                    <select name="mod_acordare" id="mod_acordare" class="form-select">
+                        <?php $selected_mod = $_POST['mod_acordare'] ?? ''; ?>
+                        <option value="">-- Selectează modul --</option>
+                        <option value="transfer bancar" <?php echo ($selected_mod == 'transfer bancar') ? 'selected' : ''; ?>>Transfer bancar</option>
+                        <option value="numerar" <?php echo ($selected_mod == 'numerar') ? 'selected' : ''; ?>>Numerar</option>
+                        <option value="bunuri" <?php echo ($selected_mod == 'bunuri') ? 'selected' : ''; ?>>Bunuri</option>
+                        <option value="servicii" <?php echo ($selected_mod == 'servicii') ? 'selected' : ''; ?>>Servicii</option>
+                    </select>
+                </div>
                 
                 <div class="col-12">
                     <label for="scop_donatie" class="form-label fw-bold">Scopul Donației:</label>
@@ -281,6 +316,24 @@ $rezultate_asistati = mysqli_query($conn, $sql_asistati);
                     <input name="nr_act_doveditor" id="nr_act_doveditor" type="text" class="form-control" placeholder="Număr act (Ex: Seria + Nr. chitanță/factură)"
                            value="<?php echo htmlspecialchars($_POST['nr_act_doveditor'] ?? ''); ?>">
                 </div>
+
+                <div class="col-md-4">
+                    <label for="cont_beneficiar" class="form-label fw-bold">Cont beneficiar:</label>
+                    <input name="cont_beneficiar" id="cont_beneficiar" type="text" class="form-control"
+                           value="<?php echo htmlspecialchars($_POST['cont_beneficiar'] ?? ''); ?>">
+                </div>
+
+                <div class="col-md-4">
+                    <label for="numar_ordin_plata" class="form-label fw-bold">Număr ordin de plată:</label>
+                    <input name="numar_ordin_plata" id="numar_ordin_plata" type="text" class="form-control"
+                           value="<?php echo htmlspecialchars($_POST['numar_ordin_plata'] ?? ''); ?>">
+                </div>
+
+                <div class="col-md-4">
+                    <label for="sursa_fondurilor" class="form-label fw-bold">Sursa fondurilor:</label>
+                    <input name="sursa_fondurilor" id="sursa_fondurilor" type="text" class="form-control"
+                           value="<?php echo htmlspecialchars($_POST['sursa_fondurilor'] ?? ''); ?>">
+                </div>
                 
                 <div class="col-md-4">
                     <label for="link_act" class="form-label fw-bold">Link Act Doveditor:</label>
@@ -294,6 +347,11 @@ $rezultate_asistati = mysqli_query($conn, $sql_asistati);
                     <div class="form-text">
                         Opțional: Dacă nu ai un link, încarcă fișierul. Se acceptă PDF, imagini sau DOCX (max 5 MB).
                     </div>
+                </div>
+
+                <div class="col-12">
+                    <label for="observatii_ajutor" class="form-label fw-bold">Observații ajutor:</label>
+                    <textarea name="observatii_ajutor" id="observatii_ajutor" class="form-control" rows="3"><?php echo htmlspecialchars($_POST['observatii_ajutor'] ?? ''); ?></textarea>
                 </div>
 
                 <div class="col-12 mt-4 text-center">

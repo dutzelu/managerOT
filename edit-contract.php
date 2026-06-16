@@ -16,9 +16,27 @@ if (isset($_POST['submit'])) {
     $beneficiar     = trim($_POST['beneficiar']);
     $suma           = (float)$_POST['suma'];
     $link_contract = trim($_POST['link_contract']);
-    
-    // De asemenea, se preia link-ul existent din câmpul ascuns pentru cazul în care se trimite fișierul.
-    // (Părți din logica de upload de fișiere sunt omise aici, dar câmpul este inclus)
+
+    // Upload PDF dacă a fost furnizat
+    if (isset($_FILES['contract_file']) && $_FILES['contract_file']['error'] === UPLOAD_ERR_OK) {
+        $upload_dir = __DIR__ . '/uploads/contracte/';
+        if (!is_dir($upload_dir)) {
+            mkdir($upload_dir, 0755, true);
+        }
+        $finfo = new finfo(FILEINFO_MIME_TYPE);
+        $mime  = $finfo->file($_FILES['contract_file']['tmp_name']);
+        if ($mime === 'application/pdf') {
+            $num_safe    = preg_replace('/[^a-zA-Z0-9_-]/', '_', $numar);
+            $fisier_name = $num_safe . '_' . time() . '.pdf';
+            if (move_uploaded_file($_FILES['contract_file']['tmp_name'], $upload_dir . $fisier_name)) {
+                $link_contract = 'uploads/contracte/' . $fisier_name;
+            } else {
+                $error_message = "Eroare la salvarea fișierului PDF.";
+            }
+        } else {
+            $error_message = "Fișierul încărcat nu este un PDF valid.";
+        }
+    }
     
     // Interogarea UPDATE (cu Prepared Statements)
     $sql_update = "UPDATE contracte SET 
@@ -183,9 +201,20 @@ $suma_afisata = number_format($contract['suma'] ?? 0, 2, '.', '');
                         <label for="link_contract" class="form-label fw-bold">Link Document Contract (URL/Drive):</label>
                         <input name="link_contract" id="link_contract" type="url" class="form-control" value="<?php echo htmlspecialchars($contract['link_contract'] ?? ''); ?>" placeholder="http://">
                         <?php if (!empty($contract['link_contract'])): ?>
+                            <?php
+                                $lc = $contract['link_contract'];
+                                $este_fisier_local = str_starts_with($lc, 'uploads/');
+                                $href = $este_fisier_local ? '/' . ltrim(dirname($_SERVER['SCRIPT_NAME']), '/') . '/' . $lc : $lc;
+                                $href = preg_replace('#/+#', '/', $href);
+                            ?>
                             <div class="form-text mt-2">
-                                <i class="bi bi-paperclip me-1"></i> 
-                                Link actual: <a href="<?php echo htmlspecialchars($contract['link_contract']); ?>" target="_blank" class="text-primary">Deschide documentul</a>
+                                <?php if ($este_fisier_local): ?>
+                                    <i class="bi bi-file-earmark-pdf-fill text-danger me-1"></i>
+                                    PDF încărcat: <a href="<?php echo htmlspecialchars($href); ?>" target="_blank" class="text-danger fw-semibold">Vizualizează PDF</a>
+                                <?php else: ?>
+                                    <i class="bi bi-paperclip me-1"></i>
+                                    Link actual: <a href="<?php echo htmlspecialchars($lc); ?>" target="_blank" class="text-primary">Deschide documentul</a>
+                                <?php endif; ?>
                             </div>
                         <?php endif; ?>
                     </div>

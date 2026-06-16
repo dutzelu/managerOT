@@ -1,149 +1,199 @@
-﻿<?php
-// update-asistat-social-nou.php - Adaugare Asistat Social (SECURIZAT)
+<?php
+$titlu_pg = "Salvare fisa sociala";
+include "includes/header.php";
 
-// Include conexiunea la baza de date ($conn) și funcțiile (inclusiv test_input și replaceSpecialChars)
-// Presupunem că $conn este definit în conexiune.php (inclus prin header.php)
-include "includes/header.php"; 
+function social_post($key) {
+    return trim((string)($_POST[$key] ?? ''));
+}
 
-// Inițializări necesare pentru a preveni erorile de variabile nedefinite
-$errors = []; 
-$link_ci = ''; 
-$nume_prenume_asistat = ''; 
+function social_null_post($key) {
+    $value = social_post($key);
+    return $value === '' ? null : $value;
+}
 
-if(isset ($_POST["submit"]) ) {
-    
-    // --- 1. Preluare și Sanitizare Date ---
-    $nume = test_input($_POST['nume']);
-    $prenume = test_input($_POST['prenume']);
-    $cnp = test_input($_POST['cnp']);
-    $serie_nr_ci = test_input($_POST['serie_nr_ci']);
-    $adresa_completa = test_input($_POST['adresa_completa']);
-    $localitate = test_input($_POST['localitate']);
-    $judet = test_input($_POST['judet']);
-    $stare_civila = $_POST['stare_civila'];
-    
-    // Logică pentru acord gen
-    if (!empty($cnp) && strlen($cnp) >= 1) {
-      $prima_cifra = $cnp[0];
-      if (($prima_cifra == 2 || $prima_cifra == 6) && substr($stare_civila, -1) !== 'ă') {
-        $stare_civila = $stare_civila . "ă";
-      } 
+function social_bind_params($stmt, $types, &$values) {
+    $refs = array($types);
+    foreach ($values as $key => &$value) {
+        $refs[] = &$value;
     }
-    
-    $nr_copii = $_POST['nr_copii'] ?? 0;
-    $descriere = test_input($_POST['descriere']);
-    $contract_sponsorizare = $_POST['contract_sponsorizare'];
-    $link_contract = $_POST['link_contract'];
-    $telefon = $_POST['telefon'];
-    
-    $nume_complet_folder = replaceSpecialChars($nume) . "-" . replaceSpecialChars($prenume);
-    $target_dir = "asistati-social/" . $nume_complet_folder;
-    $nume_prenume_asistat = $nume . ' ' . $prenume;
+    return call_user_func_array(array($stmt, 'bind_param'), $refs);
+}
 
-    // --- 2. LOGICĂ UPLOAD FIȘIER (COPIE CI) ---
-    
-    // Creare director (dacă nu există)
-    if (!is_dir($target_dir)) {
-        if (!mkdir($target_dir, 0777, true)) {
-            // Dacă directorul nu se poate crea, adăugăm eroare dar permitem inserarea datelor (fără CI)
-            $errors[] = "Eroare la crearea directorului pentru documente. Datele vor fi salvate fără CI.";
-        }
+function social_insert_row($conn, $table, $data) {
+    $columns = array_keys($data);
+    $placeholders = implode(', ', array_fill(0, count($columns), '?'));
+    $sql = "INSERT INTO `$table` (`" . implode('`, `', $columns) . "`) VALUES ($placeholders)";
+    $stmt = $conn->prepare($sql);
+    $values = array_values($data);
+    $types = str_repeat('s', count($values));
+    social_bind_params($stmt, $types, $values);
+    $stmt->execute();
+    $id = $stmt->insert_id;
+    $stmt->close();
+    return $id;
+}
+
+if (!isset($_POST['submit'])) {
+    echo '<div class="container mt-4"><div class="alert alert-warning">Acces invalid.</div></div>';
+    include "includes/footer.php";
+    exit;
+}
+
+$required = array(
+    'nume' => 'Nume',
+    'prenume' => 'Prenume',
+    'cnp' => 'CNP',
+    'telefon' => 'Telefon',
+    'localitate' => 'Localitate',
+    'judet' => 'Judet',
+    'data_evaluarii' => 'Data evaluarii',
+    'status_caz' => 'Status caz'
+);
+
+$errors = array();
+foreach ($required as $key => $label) {
+    if (social_post($key) === '') {
+        $errors[] = "$label este obligatoriu.";
     }
-    
-    // Verificăm dacă există un fișier de încărcat și nu există erori inițiale
-    if(isset($_FILES['copiebuletin']) && $_FILES['copiebuletin']['error'] === UPLOAD_ERR_OK){
-        
-        $file_name = $_FILES['copiebuletin']['name'];
-        $file_tmp = $_FILES['copiebuletin']['tmp_name'];
-        $file_size = $_FILES['copiebuletin']['size'];
-        $file_ext = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
-        
-        $allowed_extensions = array("jpeg","jpg","png","pdf"); 
-        $max_size = 5 * 1024 * 1024; // 5 MB
-        
-        // Validare extensie
-        if(!in_array($file_ext, $allowed_extensions)){
-          $errors[] = "Extensia nu este permisă. Folosiți JPEG, JPG, PNG sau PDF.";
-        }
-        
-        // Validare mărime
-        if($file_size > $max_size) {
-          $errors[] = 'Mărimea fișierului trebuie să fie sub 5 MB.';
-        }
-        
-        if(empty($errors)) {
-          // Nume unic al fișierului pentru a preveni coliziunile și a fi mai specific
-          $unique_file_name = "CI-" . $nume_complet_folder . "." . $file_ext;
-          $destination_path = $target_dir . '/' . $unique_file_name;
-          
-          if(move_uploaded_file($file_tmp, $destination_path)) {
-            $link_ci = $destination_path; 
-          } else {
-             $errors[] = "Eroare la mutarea fișierului (permisiuni server?). Datele vor fi salvate fără CI.";
-          }
-        }
-    } 
-    
-    // --- 3. LOGICĂ INSERARE ÎN BAZA DE DATE (Prepared Statement) ---
+}
 
-    // Interogarea SQL (folosind `?` ca placeholder)
-    $sql_insert = "
-        INSERT INTO asistati_social 
-        (nume, prenume, cnp, serie_nr_ci, adresa_completa, localitate, judet, stare_civila, nr_copii, 
-         descriere, contract_sponsorizare, link_contract, link_ci, telefon)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    ";
+$tip_sprijin = social_join_post_values('tip_sprijin_solicitat');
+if ($tip_sprijin === '') {
+    $errors[] = 'Tip sprijin solicitat este obligatoriu.';
+}
 
-    // Pregătirea interogării
-    $stmt = $conn->prepare($sql_insert);
-    
-    if ($stmt === false) {
-        // Eroare la pregătirea interogării (sintaxă SQL incorectă)
-        $errors[] = "Eroare la pregătirea interogării SQL: " . $conn->error;
-    } else {
-        // Tipuri de date: "ssssssssisssss" (14 parametri: 13 string-uri, 1 integer)
-        $tipuri = "ssssssssisssss"; 
-        $nr_copii_int = (int)$nr_copii; // Asigurăm că este un integer
+if (!empty($errors)) {
+    echo '<div class="container mt-4"><div class="alert alert-danger"><ul>';
+    foreach ($errors as $error) {
+        echo '<li>' . htmlspecialchars($error) . '</li>';
+    }
+    echo '</ul><a href="asistat-social-nou.php" class="btn btn-primary mt-2">Inapoi la formular</a></div></div>';
+    include "includes/footer.php";
+    exit;
+}
 
-        $stmt->bind_param($tipuri, 
-            $nume, $prenume, $cnp, $serie_nr_ci, $adresa_completa, $localitate, $judet, $stare_civila, 
-            $nr_copii_int, // Parametru integer
-            $descriere, $contract_sponsorizare, $link_contract, $link_ci, $telefon
+try {
+    $conn->begin_transaction();
+
+    $serie_ci = social_post('serie_ci');
+    $numar_ci = social_post('numar_ci');
+    $serie_nr_ci = trim($serie_ci . ' ' . $numar_ci);
+    $nr_copii_minori = social_post('nr_copii_minori');
+    $observatii_sociale = social_post('observatii_sociale');
+    $concluzie_sociala = social_post('concluzie_sociala');
+
+    $beneficiar = array(
+        'nume' => social_post('nume'),
+        'prenume' => social_post('prenume'),
+        'cnp' => social_post('cnp'),
+        'serie_ci' => $serie_ci,
+        'numar_ci' => $numar_ci,
+        'serie_nr_ci' => $serie_nr_ci,
+        'data_nasterii' => social_null_post('data_nasterii'),
+        'telefon' => social_post('telefon'),
+        'email' => social_post('email'),
+        'adresa_completa' => social_post('adresa_completa'),
+        'localitate' => social_post('localitate'),
+        'judet' => social_post('judet'),
+        'stare_civila' => social_post('stare_civila'),
+        'ocupatie' => social_post('ocupatie'),
+        'observatii_generale' => social_post('observatii_generale'),
+        'nr_copii' => $nr_copii_minori === '' ? 0 : $nr_copii_minori,
+        'descriere' => $observatii_sociale,
+        'descriere_scurta' => $concluzie_sociala
+    );
+    $beneficiar_id = social_insert_row($conn, 'asistati_social', $beneficiar);
+
+    $fisa = array(
+        'beneficiar_id' => $beneficiar_id,
+        'nr_total_membri' => social_null_post('nr_total_membri'),
+        'nr_copii_minori' => $nr_copii_minori === '' ? null : $nr_copii_minori,
+        'nr_adulti' => social_null_post('nr_adulti'),
+        'nr_varstnici' => social_null_post('nr_varstnici'),
+        'nr_persoane_dizabilitati' => social_null_post('nr_persoane_dizabilitati'),
+        'persoane_intretinere' => social_post('persoane_intretinere'),
+        'observatii_familie' => social_post('observatii_familie'),
+        'tip_locuinta' => social_post('tip_locuinta'),
+        'nr_camere' => social_null_post('nr_camere'),
+        'conditii_locuire' => social_post('conditii_locuire'),
+        'utilitati' => social_join_post_values('utilitati'),
+        'risc_evacuare' => social_post('risc_evacuare'),
+        'observatii_locuinta' => social_post('observatii_locuinta'),
+        'venit_lunar_estimat' => social_null_post('venit_lunar_estimat'),
+        'surse_venit' => social_join_post_values('surse_venit'),
+        'datorii_importante' => social_post('datorii_importante'),
+        'descriere_datorii' => social_post('descriere_datorii'),
+        'cheltuieli_lunare_majore' => social_post('cheltuieli_lunare_majore'),
+        'observatii_financiare' => social_post('observatii_financiare'),
+        'probleme_medicale' => social_post('probleme_medicale'),
+        'descriere_probleme_medicale' => social_post('descriere_probleme_medicale'),
+        'persoane_cu_dizabilitati' => social_post('persoane_cu_dizabilitati'),
+        'grad_handicap' => social_post('grad_handicap'),
+        'documente_medicale_disponibile' => social_post('documente_medicale_disponibile'),
+        'alte_vulnerabilitati' => social_join_post_values('alte_vulnerabilitati'),
+        'observatii_sociale' => $observatii_sociale,
+        'tip_sprijin_solicitat' => $tip_sprijin,
+        'descriere_nevoie' => social_post('descriere_nevoie'),
+        'urgenta_caz' => social_post('urgenta_caz'),
+        'suma_estimata_necesara' => social_null_post('suma_estimata_necesara'),
+        'perioada_sprijin' => social_post('perioada_sprijin'),
+        'alte_surse_ajutor' => social_post('alte_surse_ajutor'),
+        'detalii_alte_surse' => social_post('detalii_alte_surse'),
+        'data_evaluarii' => social_null_post('data_evaluarii'),
+        'modalitate_evaluare' => social_post('modalitate_evaluare'),
+        'persoana_recomandare' => social_post('persoana_recomandare'),
+        'nivel_vulnerabilitate' => social_post('nivel_vulnerabilitate'),
+        'recomandare_interna' => social_post('recomandare_interna'),
+        'motivare_recomandare' => social_post('motivare_recomandare'),
+        'status_caz' => social_post('status_caz'),
+        'data_deciziei' => social_null_post('data_deciziei'),
+        'tip_ajutor_aprobat' => social_post('tip_ajutor_aprobat'),
+        'suma_aprobata' => social_null_post('suma_aprobata'),
+        'observatii_decizie' => social_post('observatii_decizie'),
+        'gdpr_informat' => social_post('gdpr_informat'),
+        'gdpr_semnat' => social_post('gdpr_semnat'),
+        'acord_fotografii' => social_post('acord_fotografii'),
+        'acord_poveste_publica' => social_post('acord_poveste_publica'),
+        'data_acord_gdpr' => social_null_post('data_acord_gdpr'),
+        'observatii_interne' => social_post('observatii_interne'),
+        'concluzie_sociala' => $concluzie_sociala,
+        'recomandare_finala' => social_post('recomandare_finala')
+    );
+    $fisa_id = social_insert_row($conn, 'fise_sociale', $fisa);
+
+    social_log_change($conn, $beneficiar_id, $fisa_id, 'creare', 'fisa sociala', '', 'Fisa sociala initiala', 'Beneficiar creat.');
+
+    $tip_document = social_post('tip_document');
+    if ($tip_document === '' && isset($_FILES['document_social']) && ($_FILES['document_social']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) {
+        $tip_document = 'alte documente';
+    }
+    if ($tip_document !== '') {
+        [$ok, $message] = social_store_document(
+            $conn,
+            $_FILES['document_social'] ?? null,
+            $beneficiar_id,
+            $fisa_id,
+            null,
+            $tip_document,
+            social_post('observatii_document')
         );
-
-        // Executarea interogării
-        if ($stmt->execute()) {
-            // Succes: Redirecționare
-            $stmt->close();
-            header("Location: asistat-social-nou.php?asistat=" . urlencode($nume_prenume_asistat));
-            exit(); 
-        } else {
-            // Eroare la executare 
-            $errors[] = "Eroare la salvarea datelor în baza de date: " . $stmt->error;
+        if (!$ok) {
+            throw new Exception($message);
         }
-        
-        $stmt->close();
-    }
-    
-    // --- 4. AFIȘARE ERORI (Dacă s-a ajuns aici) ---
-    if (!empty($errors)) {
-        echo '<div class="container mt-4">';
-        echo '<h2><i class="bi bi-x-circle-fill me-2 text-danger"></i> Eroare la adăugarea asistatului social</h2>';
-        echo '<div class="alert alert-danger">';
-        echo '<ul>';
-        foreach ($errors as $error) {
-            echo '<li>' . htmlspecialchars($error) . '</li>';
-        }
-        echo '</ul>';
-        echo '<p class="mt-3"><a href="asistat-social-nou.php" class="btn btn-primary"><i class="bi bi-arrow-left me-1"></i> Înapoi la formular</a></p>';
-        echo '</div>';
-        echo '</div>';
     }
 
-
-} else {
-    // Acces direct la fișier, fără formular
-    echo '<div class="container mt-4"><div class="alert alert-warning"><i class="bi bi-exclamation-triangle-fill me-2"></i> Acces invalid. Vă rugăm folosiți formularul de adăugare.</div></div>';
+    $conn->commit();
+    $nume_complet = $beneficiar['nume'] . ' ' . $beneficiar['prenume'];
+    header("Location: asistat-social-nou.php?asistat=" . urlencode($nume_complet));
+    exit;
+} catch (Throwable $e) {
+    $conn->rollback();
+    echo '<div class="container mt-4">';
+    echo '<div class="alert alert-danger">';
+    echo '<h4>Eroare la salvarea fisei</h4>';
+    echo '<p>' . htmlspecialchars($e->getMessage()) . '</p>';
+    echo '<a href="asistat-social-nou.php" class="btn btn-primary">Inapoi la formular</a>';
+    echo '</div></div>';
 }
 
 include "includes/footer.php";

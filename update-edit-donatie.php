@@ -10,10 +10,15 @@ if(isset ($_POST["submit"]) ) {
 
     $suma_lei = test_input($_POST['suma_lei']);
     $tip_donatie = test_input($_POST['tip_donatie']);
+    $mod_acordare = test_input($_POST['mod_acordare'] ?? '');
     $act_doveditor = test_input($_POST['act_doveditor']);
     $nr_act_doveditor = test_input($_POST['nr_act_doveditor']);
+    $cont_beneficiar = test_input($_POST['cont_beneficiar'] ?? '');
+    $numar_ordin_plata = test_input($_POST['numar_ordin_plata'] ?? '');
+    $sursa_fondurilor = test_input($_POST['sursa_fondurilor'] ?? '');
     $link_act = test_input($_POST['link_act']);
     $scop_donatie = test_input($_POST['scop_donatie']);
+    $observatii_ajutor = test_input($_POST['observatii_ajutor'] ?? '');
     $data_donatiei = test_input($_POST['data']);
     $proces_verbal = test_input($_POST['proces_verbal']);
     $link_proces_verbal = test_input($_POST['link_proces_verbal']);
@@ -68,12 +73,17 @@ if(isset ($_POST["submit"]) ) {
     
     `suma_lei` = '$suma_lei',
     `tip_donatie` = '$tip_donatie',
+    `mod_acordare` = '$mod_acordare',
     `act_doveditor` = '$act_doveditor',
     `nr_act_doveditor` = '$nr_act_doveditor',
+    `cont_beneficiar` = '$cont_beneficiar',
+    `numar_ordin_plata` = '$numar_ordin_plata',
+    `sursa_fondurilor` = '$sursa_fondurilor',
     `link_act` = '$link_act',
     `proces_verbal` = '$proces_verbal',
     `link_proces_verbal` = '$link_proces_verbal',
     `scop_donatie` = '$scop_donatie',
+    `observatii_ajutor` = '$observatii_ajutor',
     `data` = '$data_donatiei'
 
      WHERE `id` = '$id';";

@@ -33,7 +33,7 @@ include "includes/header.php";
 
         // 2. Extragerea Datelor Donației din Baza de Date
         try {
-            $stmt = $conn->prepare("SELECT `ID`, `id_asistat`, `suma_lei`, `tip_donatie`, `act_doveditor`, `nr_act_doveditor`, `link_act`, `proces_verbal`, `link_proces_verbal`, `scop_donatie`, `data` FROM `donatii` WHERE `ID` = ?");
+            $stmt = $conn->prepare("SELECT `ID`, `id_asistat`, `suma_lei`, `tip_donatie`, `mod_acordare`, `act_doveditor`, `nr_act_doveditor`, `cont_beneficiar`, `numar_ordin_plata`, `sursa_fondurilor`, `link_act`, `proces_verbal`, `link_proces_verbal`, `scop_donatie`, `data`, `observatii_ajutor` FROM `donatii` WHERE `ID` = ?");
             
             if ($stmt === false) {
                 throw new Exception("Eroare la pregătirea interogării: " . $conn->error);
@@ -55,13 +55,18 @@ include "includes/header.php";
             $id_asistat = $data['id_asistat'];
             $suma_lei = $data['suma_lei'];
             $tip_donatie = $data['tip_donatie'];
+            $mod_acordare = $data['mod_acordare'];
             $act_doveditor = $data['act_doveditor'];
             $nr_act_doveditor = $data['nr_act_doveditor'];
+            $cont_beneficiar = $data['cont_beneficiar'];
+            $numar_ordin_plata = $data['numar_ordin_plata'];
+            $sursa_fondurilor = $data['sursa_fondurilor'];
             $link_act = $data['link_act'];
             $proces_verbal = $data['proces_verbal'];
             $link_proces_verbal = $data['link_proces_verbal'];
             $scop_donatie = $data['scop_donatie'];
             $data_donatiei = $data['data'];
+            $observatii_ajutor = $data['observatii_ajutor'];
             
             
             // 3. FIX: Extragerea numelui beneficiarului (Asistat Social)
@@ -150,6 +155,17 @@ include "includes/header.php";
             </div>
 
             <div class="col-12">
+                <label for="modAcordareSelect" class="form-label">Mod acordare:</label>
+                <select name="mod_acordare" id="modAcordareSelect" class="form-select">
+                    <option value="">-- Selectează modul --</option>
+                    <option <?php if ($mod_acordare == "transfer bancar") echo 'selected';?> value="transfer bancar">Transfer bancar</option>
+                    <option <?php if ($mod_acordare == "numerar") echo 'selected';?> value="numerar">Numerar</option>
+                    <option <?php if ($mod_acordare == "bunuri") echo 'selected';?> value="bunuri">Bunuri</option>
+                    <option <?php if ($mod_acordare == "servicii") echo 'selected';?> value="servicii">Servicii</option>
+                </select>
+            </div>
+
+            <div class="col-12">
                 <label for="scopDonatieInput" class="form-label">Scop donație:</label>
                 <input name="scop_donatie" id="scopDonatieInput" type="text" class="form-control" value="<?php echo htmlspecialchars($scop_donatie);?>" placeholder="Ex: Ajutor chirie și alimente">
             </div>
@@ -169,6 +185,21 @@ include "includes/header.php";
                 <input name="nr_act_doveditor" id="nrActDoveditorInput" type="text" class="form-control" value="<?php echo htmlspecialchars($nr_act_doveditor); ?>">
             </div>
 
+            <div class="col-md-4">
+                <label for="contBeneficiarInput" class="form-label">Cont beneficiar:</label>
+                <input name="cont_beneficiar" id="contBeneficiarInput" type="text" class="form-control" value="<?php echo htmlspecialchars($cont_beneficiar); ?>">
+            </div>
+
+            <div class="col-md-4">
+                <label for="ordinPlataInput" class="form-label">Număr ordin de plată:</label>
+                <input name="numar_ordin_plata" id="ordinPlataInput" type="text" class="form-control" value="<?php echo htmlspecialchars($numar_ordin_plata); ?>">
+            </div>
+
+            <div class="col-md-4">
+                <label for="sursaFonduriInput" class="form-label">Sursa fondurilor:</label>
+                <input name="sursa_fondurilor" id="sursaFonduriInput" type="text" class="form-control" value="<?php echo htmlspecialchars($sursa_fondurilor); ?>">
+            </div>
+
             <div class="col-12">
                 <label for="linkActInput" class="form-label">Link act doveditor:</label>
                 <input name="link_act" id="linkActInput" type="text" class="form-control" value="<?php echo htmlspecialchars($link_act); ?>" placeholder="Adresa URL completă sau calea către document">
@@ -180,6 +211,11 @@ include "includes/header.php";
                 <?php if (!empty($link_act)): ?>
                     <small class="form-text text-muted">Document curent: <a href="<?php echo htmlspecialchars($link_act); ?>" target="_blank">Vizualizează</a></small>
                 <?php endif; ?>
+            </div>
+
+            <div class="col-12">
+                <label for="observatiiAjutorInput" class="form-label">Observații ajutor:</label>
+                <textarea name="observatii_ajutor" id="observatiiAjutorInput" class="form-control" rows="3"><?php echo htmlspecialchars($observatii_ajutor); ?></textarea>
             </div>
 
             <hr class="mt-4 mb-3"> <h6 class="mt-3 text-secondary">Detalii Proces Verbal (Opțional)</h6>
