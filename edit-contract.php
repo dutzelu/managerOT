@@ -25,16 +25,22 @@ if (isset($_POST['submit'])) {
         }
         $finfo = new finfo(FILEINFO_MIME_TYPE);
         $mime  = $finfo->file($_FILES['contract_file']['tmp_name']);
-        if ($mime === 'application/pdf') {
+        $allowed_mimes = [
+            'application/pdf'                                                          => 'pdf',
+            'application/msword'                                                       => 'doc',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document'  => 'docx',
+        ];
+        if (isset($allowed_mimes[$mime])) {
+            $ext         = $allowed_mimes[$mime];
             $num_safe    = preg_replace('/[^a-zA-Z0-9_-]/', '_', $numar);
-            $fisier_name = $num_safe . '_' . time() . '.pdf';
+            $fisier_name = $num_safe . '_' . time() . '.' . $ext;
             if (move_uploaded_file($_FILES['contract_file']['tmp_name'], $upload_dir . $fisier_name)) {
                 $link_contract = 'uploads/contracte/' . $fisier_name;
             } else {
-                $error_message = "Eroare la salvarea fișierului PDF.";
+                $error_message = "Eroare la salvarea fișierului.";
             }
         } else {
-            $error_message = "Fișierul încărcat nu este un PDF valid.";
+            $error_message = "Fișierul încărcat nu este valid. Sunt acceptate: PDF, DOC, DOCX.";
         }
     }
     
@@ -208,9 +214,19 @@ $suma_afisata = number_format($contract['suma'] ?? 0, 2, '.', '');
                                 $href = preg_replace('#/+#', '/', $href);
                             ?>
                             <div class="form-text mt-2">
-                                <?php if ($este_fisier_local): ?>
+                                <?php if ($este_fisier_local):
+                                    $ext_lc = strtolower(pathinfo($lc, PATHINFO_EXTENSION));
+                                    if ($ext_lc === 'pdf'):
+                                ?>
                                     <i class="bi bi-file-earmark-pdf-fill text-danger me-1"></i>
-                                    PDF încărcat: <a href="<?php echo htmlspecialchars($href); ?>" target="_blank" class="text-danger fw-semibold">Vizualizează PDF</a>
+                                    Fișier încărcat: <a href="<?php echo htmlspecialchars($href); ?>" target="_blank" class="text-danger fw-semibold">Vizualizează PDF</a>
+                                <?php elseif ($ext_lc === 'doc' || $ext_lc === 'docx'): ?>
+                                    <i class="bi bi-file-earmark-word-fill text-primary me-1"></i>
+                                    Fișier încărcat: <a href="<?php echo htmlspecialchars($href); ?>" target="_blank" class="text-primary fw-semibold">Descarcă <?php echo strtoupper($ext_lc); ?></a>
+                                <?php else: ?>
+                                    <i class="bi bi-file-earmark-fill me-1"></i>
+                                    Fișier încărcat: <a href="<?php echo htmlspecialchars($href); ?>" target="_blank" class="fw-semibold">Descarcă fișier</a>
+                                <?php endif; ?>
                                 <?php else: ?>
                                     <i class="bi bi-paperclip me-1"></i>
                                     Link actual: <a href="<?php echo htmlspecialchars($lc); ?>" target="_blank" class="text-primary">Deschide documentul</a>
@@ -221,7 +237,7 @@ $suma_afisata = number_format($contract['suma'] ?? 0, 2, '.', '');
                     
                     <div class="col-12 mt-4">
                         <label for="contract_file" class="form-label fw-bold">Încarcă Fișier Contract (.pdf, .docx):</label>
-                        <input type="file" name="contract_file" id="contract_file" class="form-control" accept=".pdf,.docx">
+                        <input type="file" name="contract_file" id="contract_file" class="form-control" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document">
                         <div class="form-text">
                             Lăsați gol dacă nu doriți să actualizați fișierul.
                         </div>

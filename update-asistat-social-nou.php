@@ -1,6 +1,20 @@
 <?php
 $titlu_pg = "Salvare fisa sociala";
-include "includes/header.php";
+ob_start();
+
+require_once __DIR__ . "/includes/conexiune.php";
+require_once __DIR__ . "/includes/functii.php";
+
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_start();
+}
+
+if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
+    header("Location: " . BASE_URL . "login/login.php");
+    exit;
+}
+
+setlocale(LC_TIME, array('ro.utf-8', 'ro_RO.UTF-8', 'ro_RO.utf-8', 'ro', 'ro_RO', 'ro_RO.ISO8859-2'));
 
 function social_post($key) {
     return trim((string)($_POST[$key] ?? ''));
@@ -34,6 +48,7 @@ function social_insert_row($conn, $table, $data) {
 }
 
 if (!isset($_POST['submit'])) {
+    include "includes/header.php";
     echo '<div class="container mt-4"><div class="alert alert-warning">Acces invalid.</div></div>';
     include "includes/footer.php";
     exit;
@@ -43,7 +58,6 @@ $required = array(
     'nume' => 'Nume',
     'prenume' => 'Prenume',
     'cnp' => 'CNP',
-    'telefon' => 'Telefon',
     'localitate' => 'Localitate',
     'judet' => 'Judet',
     'data_evaluarii' => 'Data evaluarii',
@@ -63,6 +77,7 @@ if ($tip_sprijin === '') {
 }
 
 if (!empty($errors)) {
+    include "includes/header.php";
     echo '<div class="container mt-4"><div class="alert alert-danger"><ul>';
     foreach ($errors as $error) {
         echo '<li>' . htmlspecialchars($error) . '</li>';
@@ -184,10 +199,14 @@ try {
 
     $conn->commit();
     $nume_complet = $beneficiar['nume'] . ' ' . $beneficiar['prenume'];
+    if (ob_get_length() !== false) {
+        ob_clean();
+    }
     header("Location: asistat-social-nou.php?asistat=" . urlencode($nume_complet));
     exit;
 } catch (Throwable $e) {
     $conn->rollback();
+    include "includes/header.php";
     echo '<div class="container mt-4">';
     echo '<div class="alert alert-danger">';
     echo '<h4>Eroare la salvarea fisei</h4>';

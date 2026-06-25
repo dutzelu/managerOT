@@ -273,6 +273,103 @@ if (!function_exists('social_clean_filename')) {
   }
 }
 
+if (!function_exists('social_ensure_external_tables')) {
+  function social_ensure_external_tables($conn) {
+    $conn->query("
+      CREATE TABLE IF NOT EXISTS asistat_external_links (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        beneficiar_id INT NOT NULL,
+        token_hash CHAR(64) NOT NULL,
+        expires_at DATETIME NOT NULL,
+        used_at DATETIME NULL,
+        revoked_at DATETIME NULL,
+        created_by VARCHAR(190) NULL,
+        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        UNIQUE KEY uniq_external_token_hash (token_hash),
+        INDEX idx_external_links_beneficiar (beneficiar_id),
+        INDEX idx_external_links_status (expires_at, used_at, revoked_at)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    ");
+
+    $conn->query("
+      CREATE TABLE IF NOT EXISTS asistat_external_submissions (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        link_id INT NOT NULL,
+        beneficiar_id INT NOT NULL,
+        payload_json LONGTEXT NOT NULL,
+        status VARCHAR(30) NOT NULL DEFAULT 'nou',
+        submitted_ip VARCHAR(45) NULL,
+        user_agent VARCHAR(255) NULL,
+        submitted_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        applied_at DATETIME NULL,
+        applied_by VARCHAR(190) NULL,
+        notes TEXT NULL,
+        INDEX idx_external_submissions_beneficiar (beneficiar_id),
+        INDEX idx_external_submissions_link (link_id),
+        INDEX idx_external_submissions_status (status, submitted_at)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    ");
+  }
+}
+
+if (!function_exists('social_external_beneficiar_fields')) {
+  function social_external_beneficiar_fields() {
+    return array(
+      'nume', 'prenume', 'cnp', 'serie_ci', 'numar_ci', 'data_nasterii',
+      'telefon', 'email', 'adresa_completa', 'localitate', 'judet',
+      'stare_civila', 'ocupatie', 'observatii_generale'
+    );
+  }
+}
+
+if (!function_exists('social_external_fisa_fields')) {
+  function social_external_fisa_fields() {
+    return array(
+      'nr_total_membri', 'nr_copii_minori', 'nr_adulti', 'nr_varstnici',
+      'nr_persoane_dizabilitati', 'persoane_intretinere', 'observatii_familie',
+      'tip_locuinta', 'nr_camere', 'conditii_locuire', 'utilitati',
+      'risc_evacuare', 'observatii_locuinta', 'venit_lunar_estimat',
+      'surse_venit', 'datorii_importante', 'descriere_datorii',
+      'cheltuieli_lunare_majore', 'observatii_financiare', 'probleme_medicale',
+      'descriere_probleme_medicale', 'persoane_cu_dizabilitati',
+      'grad_handicap', 'documente_medicale_disponibile', 'alte_vulnerabilitati',
+      'observatii_sociale', 'tip_sprijin_solicitat', 'descriere_nevoie',
+      'urgenta_caz', 'suma_estimata_necesara', 'perioada_sprijin',
+      'alte_surse_ajutor', 'detalii_alte_surse', 'gdpr_informat',
+      'gdpr_semnat', 'acord_fotografii', 'acord_poveste_publica',
+      'data_acord_gdpr'
+    );
+  }
+}
+
+if (!function_exists('social_uploaded_files')) {
+  function social_uploaded_files($field) {
+    $files = $_FILES[$field] ?? null;
+    if (!$files || !is_array($files['name'] ?? null)) {
+      return array();
+    }
+
+    $normalized = array();
+    foreach ($files['name'] as $index => $name) {
+      $error = $files['error'][$index] ?? UPLOAD_ERR_NO_FILE;
+      if ($error === UPLOAD_ERR_NO_FILE) {
+        continue;
+      }
+
+      $normalized[] = array(
+        'name' => $name,
+        'type' => $files['type'][$index] ?? '',
+        'tmp_name' => $files['tmp_name'][$index] ?? '',
+        'error' => $error,
+        'size' => $files['size'][$index] ?? 0
+      );
+    }
+
+    return $normalized;
+  }
+}
+
 if (!function_exists('social_store_document')) {
   function social_store_document($conn, $file, $beneficiar_id, $fisa_id, $ajutor_id, $tip_document, $observatii = '') {
     if (!isset($file) || ($file['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
@@ -299,7 +396,8 @@ if (!function_exists('social_store_document')) {
       return array(false, 'Nu s-a putut crea folderul pentru documente.');
     }
 
-    $safe_name = date('YmdHis') . '-' . social_clean_filename(pathinfo($original_name, PATHINFO_FILENAME)) . '.' . $ext;
+    $unique_part = substr(sha1(uniqid('', true)), 0, 8);
+    $safe_name = date('YmdHis') . '-' . $unique_part . '-' . social_clean_filename(pathinfo($original_name, PATHINFO_FILENAME)) . '.' . $ext;
     $path = $target_dir . '/' . $safe_name;
 
     if (!move_uploaded_file($file['tmp_name'], $path)) {

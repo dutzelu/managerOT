@@ -1,10 +1,7 @@
-﻿ <?php 
-$titlu_pg ="Contract nou";
-include "includes/header.php"; // Presupune includerea conexiunii la baza de date ($conn)
-
-// Variabila pentru mesajul de succes, preluată din URL dacă a avut loc o redirecționare după inserare
-$numar_contract_succes = $_GET['contract'] ?? null; 
-$beneficiar_succes = $_GET['beneficiar_nume'] ?? null;
+﻿<?php
+ob_start(); // bufferează output-ul astfel încât header() redirect să funcționeze după include header.php
+$titlu_pg = "Contract nou";
+include "includes/header.php";
 
 // --- LOGICA DE PROCESARE FORMULAR (POST) INCEPE AICI ---
 if (isset($_POST['submit'])) {
@@ -33,16 +30,22 @@ if (isset($_POST['submit'])) {
         }
         $finfo = new finfo(FILEINFO_MIME_TYPE);
         $mime  = $finfo->file($_FILES['fisier_pdf']['tmp_name']);
-        if ($mime === 'application/pdf') {
+        $allowed_mimes = [
+            'application/pdf'                                                          => 'pdf',
+            'application/msword'                                                       => 'doc',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document'  => 'docx',
+        ];
+        if (isset($allowed_mimes[$mime])) {
+            $ext         = $allowed_mimes[$mime];
             $num_safe    = preg_replace('/[^a-zA-Z0-9_-]/', '_', $numar_contract);
-            $fisier_name = $num_safe . '_' . time() . '.pdf';
+            $fisier_name = $num_safe . '_' . time() . '.' . $ext;
             if (move_uploaded_file($_FILES['fisier_pdf']['tmp_name'], $upload_dir . $fisier_name)) {
                 $link_final = 'uploads/contracte/' . $fisier_name;
             } else {
-                echo "<div class='alert alert-danger'>Eroare la salvarea fișierului PDF.</div>";
+                echo "<div class='alert alert-danger'>Eroare la salvarea fișierului.</div>";
             }
         } else {
-            echo "<div class='alert alert-danger'>Fișierul încărcat nu este un PDF valid.</div>";
+            echo "<div class='alert alert-danger'>Fișierul încărcat nu este valid. Sunt acceptate: PDF, DOC, DOCX.</div>";
         }
     }
 
@@ -146,9 +149,9 @@ if (isset($_POST['submit'])) {
                     </div>
 
                     <div class="col-md-6">
-                        <label for="fisier_pdf" class="form-label fw-bold">Atașează contract PDF:</label>
-                        <input type="file" name="fisier_pdf" id="fisier_pdf" class="form-control" accept="application/pdf">
-                        <div class="form-text text-muted">Dacă încarci un PDF, acesta va fi prioritizat față de link-ul de mai sus.</div>
+                        <label for="fisier_pdf" class="form-label fw-bold">Atașează contract (PDF / DOC / DOCX):</label>
+                        <input type="file" name="fisier_pdf" id="fisier_pdf" class="form-control" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document">
+                        <div class="form-text text-muted">Formate acceptate: PDF, DOC, DOCX. Dacă încarci un fișier, acesta va fi prioritizat față de link-ul de mai sus.</div>
                     </div>
 
                     <div class="col-12 mt-4">

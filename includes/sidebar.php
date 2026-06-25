@@ -33,9 +33,9 @@ if (!function_exists('sidebar_active_class')) {
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link<?php echo sidebar_active_class(array('total-donatii.php', 'lista-donatii.php', 'adauga-donatie.php', 'edit-donatie.php')); ?>" href="<?php echo BASE_URL; ?>total-donatii.php">
+                <a class="nav-link<?php echo sidebar_active_class(array('total-donatii.php', 'lista-donatii.php', 'edit-donatie.php')); ?>" href="<?php echo BASE_URL; ?>total-donatii.php">
                     <i class="bi bi-cash-coin"></i>
-                    Ajutoare acordate
+                    Donații totale
                 </a>
             </li>
         </ul>
@@ -77,9 +77,9 @@ if (!function_exists('sidebar_active_class')) {
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="<?php echo BASE_URL; ?>adauga-donatie.php">
+                <a class="nav-link<?php echo sidebar_active_class(array('adauga-donatie.php')); ?>" href="<?php echo BASE_URL; ?>adauga-donatie.php">
                     <i class="bi bi-plus-circle-fill"></i>
-                    Ajutor acordat
+                    Donație nouă
                 </a>
             </li>
             <li class="nav-item">

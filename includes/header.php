@@ -1,8 +1,10 @@
 <?php
-include __DIR__ . "/conexiune.php";
-include __DIR__ . "/functii.php";
+include_once __DIR__ . "/conexiune.php";
+include_once __DIR__ . "/functii.php";
 
-session_start();
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_start();
+}
 
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
     header("location:" . BASE_URL . "login/login.php");

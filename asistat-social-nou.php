@@ -77,8 +77,8 @@ function render_checks($name, $items, $selected_csv = '') {
                             <input name="data_nasterii" type="date" class="form-control">
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label fw-bold">Telefon *</label>
-                            <input name="telefon" type="tel" class="form-control" required>
+                            <label class="form-label">Telefon</label>
+                            <input name="telefon" type="tel" class="form-control">
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">Email</label>

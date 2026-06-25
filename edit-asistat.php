@@ -80,6 +80,188 @@ function render_checkbox_group($name, $items, $selected_csv = '') {
     }
 }
 
+function edit_uploaded_files($field) {
+    $files = $_FILES[$field] ?? null;
+    if (!$files || !is_array($files['name'] ?? null)) {
+        return array();
+    }
+
+    $normalized = array();
+    foreach ($files['name'] as $index => $name) {
+        $error = $files['error'][$index] ?? UPLOAD_ERR_NO_FILE;
+        if ($error === UPLOAD_ERR_NO_FILE) {
+            continue;
+        }
+
+        $normalized[] = array(
+            'name' => $name,
+            'type' => $files['type'][$index] ?? '',
+            'tmp_name' => $files['tmp_name'][$index] ?? '',
+            'error' => $error,
+            'size' => $files['size'][$index] ?? 0
+        );
+    }
+
+    return $normalized;
+}
+
+function edit_document_is_image($document) {
+    $filename = strtolower((string)($document['denumire_fisier'] ?? $document['cale_fisier'] ?? ''));
+    $ext = pathinfo($filename, PATHINFO_EXTENSION);
+    return in_array($ext, array('jpg', 'jpeg', 'png'), true);
+}
+
+function edit_external_labels() {
+    return array(
+        'nume' => 'Nume',
+        'prenume' => 'Prenume',
+        'cnp' => 'CNP',
+        'serie_ci' => 'Serie CI',
+        'numar_ci' => 'Numar CI',
+        'data_nasterii' => 'Data nasterii',
+        'telefon' => 'Telefon',
+        'email' => 'Email',
+        'adresa_completa' => 'Adresa completa',
+        'localitate' => 'Localitate',
+        'judet' => 'Judet',
+        'stare_civila' => 'Stare civila',
+        'ocupatie' => 'Ocupatie',
+        'observatii_generale' => 'Observatii generale',
+        'nr_total_membri' => 'Total membri',
+        'nr_copii_minori' => 'Copii minori',
+        'nr_adulti' => 'Adulti',
+        'nr_varstnici' => 'Varstnici',
+        'nr_persoane_dizabilitati' => 'Persoane cu dizabilitati',
+        'persoane_intretinere' => 'Persoane in intretinere',
+        'observatii_familie' => 'Observatii familie',
+        'tip_locuinta' => 'Tip locuinta',
+        'nr_camere' => 'Camere',
+        'conditii_locuire' => 'Conditii locuire',
+        'utilitati' => 'Utilitati',
+        'risc_evacuare' => 'Risc evacuare',
+        'observatii_locuinta' => 'Observatii locuinta',
+        'venit_lunar_estimat' => 'Venit lunar estimat',
+        'surse_venit' => 'Surse venit',
+        'datorii_importante' => 'Datorii importante',
+        'descriere_datorii' => 'Descriere datorii',
+        'cheltuieli_lunare_majore' => 'Cheltuieli lunare majore',
+        'observatii_financiare' => 'Observatii financiare',
+        'probleme_medicale' => 'Probleme medicale',
+        'descriere_probleme_medicale' => 'Descriere probleme medicale',
+        'persoane_cu_dizabilitati' => 'Persoane cu dizabilitati',
+        'grad_handicap' => 'Grad handicap',
+        'documente_medicale_disponibile' => 'Documente medicale disponibile',
+        'alte_vulnerabilitati' => 'Alte vulnerabilitati',
+        'observatii_sociale' => 'Observatii sociale',
+        'tip_sprijin_solicitat' => 'Tip sprijin solicitat',
+        'descriere_nevoie' => 'Descriere nevoie',
+        'urgenta_caz' => 'Urgenta caz',
+        'suma_estimata_necesara' => 'Suma estimata necesara',
+        'perioada_sprijin' => 'Perioada sprijin',
+        'alte_surse_ajutor' => 'Alte surse ajutor',
+        'detalii_alte_surse' => 'Detalii alte surse',
+        'gdpr_informat' => 'GDPR informat',
+        'gdpr_semnat' => 'GDPR semnat',
+        'acord_fotografii' => 'Acord fotografii',
+        'acord_poveste_publica' => 'Acord poveste publica',
+        'data_acord_gdpr' => 'Data acord GDPR'
+    );
+}
+
+function edit_payload_value($payload, $key) {
+    return trim((string)($payload[$key] ?? ''));
+}
+
+function edit_payload_null($payload, $key) {
+    $value = edit_payload_value($payload, $key);
+    return $value === '' ? null : $value;
+}
+
+function edit_render_external_payload($payload) {
+    $labels = edit_external_labels();
+    echo '<div class="table-responsive"><table class="table table-sm table-bordered mb-0">';
+    foreach ($labels as $key => $label) {
+        $value = trim((string)($payload[$key] ?? ''));
+        if ($value === '') {
+            continue;
+        }
+        echo '<tr><th style="width: 230px;">' . h($label) . '</th><td>' . nl2br(h($value)) . '</td></tr>';
+    }
+    echo '</table></div>';
+}
+
+function edit_apply_external_payload($conn, $beneficiar_id, $fisa_id, $payload, $current_user) {
+    $serie_ci = edit_payload_value($payload, 'serie_ci');
+    $numar_ci = edit_payload_value($payload, 'numar_ci');
+    $nr_copii_minori = edit_payload_value($payload, 'nr_copii_minori');
+    $observatii_sociale = edit_payload_value($payload, 'observatii_sociale');
+
+    $beneficiar_update = array(
+        'nume' => edit_payload_value($payload, 'nume'),
+        'prenume' => edit_payload_value($payload, 'prenume'),
+        'cnp' => edit_payload_value($payload, 'cnp'),
+        'serie_ci' => $serie_ci,
+        'numar_ci' => $numar_ci,
+        'serie_nr_ci' => trim($serie_ci . ' ' . $numar_ci),
+        'data_nasterii' => edit_payload_null($payload, 'data_nasterii'),
+        'telefon' => edit_payload_value($payload, 'telefon'),
+        'email' => edit_payload_value($payload, 'email'),
+        'adresa_completa' => edit_payload_value($payload, 'adresa_completa'),
+        'localitate' => edit_payload_value($payload, 'localitate'),
+        'judet' => edit_payload_value($payload, 'judet'),
+        'stare_civila' => edit_payload_value($payload, 'stare_civila'),
+        'ocupatie' => edit_payload_value($payload, 'ocupatie'),
+        'observatii_generale' => edit_payload_value($payload, 'observatii_generale'),
+        'nr_copii' => $nr_copii_minori === '' ? 0 : $nr_copii_minori,
+        'descriere' => $observatii_sociale
+    );
+
+    $fisa_update = array(
+        'nr_total_membri' => edit_payload_null($payload, 'nr_total_membri'),
+        'nr_copii_minori' => $nr_copii_minori === '' ? null : $nr_copii_minori,
+        'nr_adulti' => edit_payload_null($payload, 'nr_adulti'),
+        'nr_varstnici' => edit_payload_null($payload, 'nr_varstnici'),
+        'nr_persoane_dizabilitati' => edit_payload_null($payload, 'nr_persoane_dizabilitati'),
+        'persoane_intretinere' => edit_payload_value($payload, 'persoane_intretinere'),
+        'observatii_familie' => edit_payload_value($payload, 'observatii_familie'),
+        'tip_locuinta' => edit_payload_value($payload, 'tip_locuinta'),
+        'nr_camere' => edit_payload_null($payload, 'nr_camere'),
+        'conditii_locuire' => edit_payload_value($payload, 'conditii_locuire'),
+        'utilitati' => edit_payload_value($payload, 'utilitati'),
+        'risc_evacuare' => edit_payload_value($payload, 'risc_evacuare'),
+        'observatii_locuinta' => edit_payload_value($payload, 'observatii_locuinta'),
+        'venit_lunar_estimat' => edit_payload_null($payload, 'venit_lunar_estimat'),
+        'surse_venit' => edit_payload_value($payload, 'surse_venit'),
+        'datorii_importante' => edit_payload_value($payload, 'datorii_importante'),
+        'descriere_datorii' => edit_payload_value($payload, 'descriere_datorii'),
+        'cheltuieli_lunare_majore' => edit_payload_value($payload, 'cheltuieli_lunare_majore'),
+        'observatii_financiare' => edit_payload_value($payload, 'observatii_financiare'),
+        'probleme_medicale' => edit_payload_value($payload, 'probleme_medicale'),
+        'descriere_probleme_medicale' => edit_payload_value($payload, 'descriere_probleme_medicale'),
+        'persoane_cu_dizabilitati' => edit_payload_value($payload, 'persoane_cu_dizabilitati'),
+        'grad_handicap' => edit_payload_value($payload, 'grad_handicap'),
+        'documente_medicale_disponibile' => edit_payload_value($payload, 'documente_medicale_disponibile'),
+        'alte_vulnerabilitati' => edit_payload_value($payload, 'alte_vulnerabilitati'),
+        'observatii_sociale' => $observatii_sociale,
+        'tip_sprijin_solicitat' => edit_payload_value($payload, 'tip_sprijin_solicitat'),
+        'descriere_nevoie' => edit_payload_value($payload, 'descriere_nevoie'),
+        'urgenta_caz' => edit_payload_value($payload, 'urgenta_caz'),
+        'suma_estimata_necesara' => edit_payload_null($payload, 'suma_estimata_necesara'),
+        'perioada_sprijin' => edit_payload_value($payload, 'perioada_sprijin'),
+        'alte_surse_ajutor' => edit_payload_value($payload, 'alte_surse_ajutor'),
+        'detalii_alte_surse' => edit_payload_value($payload, 'detalii_alte_surse'),
+        'gdpr_informat' => edit_payload_value($payload, 'gdpr_informat'),
+        'gdpr_semnat' => edit_payload_value($payload, 'gdpr_semnat'),
+        'acord_fotografii' => edit_payload_value($payload, 'acord_fotografii'),
+        'acord_poveste_publica' => edit_payload_value($payload, 'acord_poveste_publica'),
+        'data_acord_gdpr' => edit_payload_null($payload, 'data_acord_gdpr')
+    );
+
+    edit_update_row($conn, 'asistati_social', $beneficiar_update, 'id', $beneficiar_id);
+    edit_update_row($conn, 'fise_sociale', $fisa_update, 'id', $fisa_id);
+    social_log_change($conn, $beneficiar_id, $fisa_id, 'formular extern', 'date beneficiar', '', 'Date aplicate in fisa', 'Aplicat de ' . $current_user . '.');
+}
+
 if (isset($_POST['delete_id']) && is_numeric($_POST['delete_id'])) {
     $delete_id = (int)$_POST['delete_id'];
     $stmt_del = $conn->prepare("DELETE FROM asistati_social WHERE id = ?");
@@ -122,12 +304,114 @@ if (empty($fisa['id'])) {
     $fisa = social_get_current_fisa($conn, $id);
 }
 
+social_ensure_external_tables($conn);
+$generated_external_url = '';
+
+if (isset($_POST['external_action'])) {
+    $external_action = edit_post('external_action');
+    try {
+        if ($external_action === 'generate_link') {
+            $conn->begin_transaction();
+
+            $stmt = $conn->prepare("
+                UPDATE asistat_external_links
+                SET revoked_at = NOW()
+                WHERE beneficiar_id = ?
+                  AND revoked_at IS NULL
+                  AND expires_at >= NOW()
+            ");
+            $stmt->bind_param("i", $id);
+            $stmt->execute();
+            $stmt->close();
+
+            $token = bin2hex(random_bytes(32));
+            $token_hash = hash('sha256', $token);
+            $expires_at = date('Y-m-d H:i:s', strtotime('+30 days'));
+            $created_by = $_SESSION['nume_utilizator'] ?? 'utilizator';
+            $stmt = $conn->prepare("
+                INSERT INTO asistat_external_links (beneficiar_id, token_hash, expires_at, created_by)
+                VALUES (?, ?, ?, ?)
+            ");
+            $stmt->bind_param("isss", $id, $token_hash, $expires_at, $created_by);
+            $stmt->execute();
+            $stmt->close();
+
+            $conn->commit();
+            $generated_external_url = BASE_URL . 'formular-asistat.php?t=' . $token;
+            $success_message = 'Linkul extern a fost generat. Copiati-l acum, tokenul nu este stocat in clar.';
+        } elseif ($external_action === 'revoke_link') {
+            $link_id = (int)($_POST['external_link_id'] ?? 0);
+            $stmt = $conn->prepare("
+                UPDATE asistat_external_links
+                SET revoked_at = NOW()
+                WHERE id = ? AND beneficiar_id = ? AND revoked_at IS NULL
+            ");
+            $stmt->bind_param("ii", $link_id, $id);
+            $stmt->execute();
+            $stmt->close();
+            $success_message = 'Linkul extern a fost revocat.';
+        } elseif ($external_action === 'apply_submission') {
+            $submission_id = (int)($_POST['submission_id'] ?? 0);
+            $stmt = $conn->prepare("
+                SELECT *
+                FROM asistat_external_submissions
+                WHERE id = ? AND beneficiar_id = ? AND status = 'nou'
+                LIMIT 1
+            ");
+            $stmt->bind_param("ii", $submission_id, $id);
+            $stmt->execute();
+            $submission = $stmt->get_result()->fetch_assoc();
+            $stmt->close();
+
+            if (!$submission) {
+                throw new Exception('Completarea externa nu mai este disponibila.');
+            }
+
+            $payload = json_decode($submission['payload_json'], true);
+            if (!is_array($payload)) {
+                throw new Exception('Datele primite nu pot fi citite.');
+            }
+
+            $conn->begin_transaction();
+            edit_apply_external_payload($conn, $id, (int)$fisa['id'], $payload, $_SESSION['nume_utilizator'] ?? 'utilizator');
+
+            $applied_by = $_SESSION['nume_utilizator'] ?? 'utilizator';
+            $stmt = $conn->prepare("
+                UPDATE asistat_external_submissions
+                SET status = 'aplicat', applied_at = NOW(), applied_by = ?
+                WHERE id = ? AND beneficiar_id = ?
+            ");
+            $stmt->bind_param("sii", $applied_by, $submission_id, $id);
+            $stmt->execute();
+            $stmt->close();
+
+            $conn->commit();
+            $success_message = 'Datele primite prin formularul extern au fost aplicate in fisa.';
+
+            $stmt_get = $conn->prepare("SELECT * FROM asistati_social WHERE id = ?");
+            $stmt_get->bind_param("i", $id);
+            $stmt_get->execute();
+            $asistat = $stmt_get->get_result()->fetch_assoc();
+            $stmt_get->close();
+            $fisa = social_get_current_fisa($conn, $id);
+        }
+    } catch (Throwable $e) {
+        if ($conn->errno === 0) {
+            // transaction state is not directly exposed by mysqli; rollback is harmless if none is active
+        }
+        try {
+            $conn->rollback();
+        } catch (Throwable $ignored) {
+        }
+        $error_message = 'Eroare link extern: ' . $e->getMessage();
+    }
+}
+
 if (isset($_POST['submit'])) {
     $required = array(
         'nume' => 'Nume',
         'prenume' => 'Prenume',
         'cnp' => 'CNP',
-        'telefon' => 'Telefon',
         'localitate' => 'Localitate',
         'judet' => 'Judet',
         'data_evaluarii' => 'Data evaluarii',
@@ -244,6 +528,7 @@ if (isset($_POST['submit'])) {
                 social_log_change($conn, $id, $old_fisa['id'], 'fisa sociala', $field, $old_fisa[$field] ?? '', $fisa_update[$field] ?? '', 'Fisa sociala modificata.');
             }
 
+            $uploaded_documents = 0;
             $tip_document = edit_post('tip_document');
             if ($tip_document === '' && isset($_FILES['document_social']) && ($_FILES['document_social']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) {
                 $tip_document = 'alte documente';
@@ -261,10 +546,38 @@ if (isset($_POST['submit'])) {
                 if (!$ok) {
                     throw new Exception($message);
                 }
+                if ($message !== null) {
+                    $uploaded_documents++;
+                }
+            }
+
+            $bulk_tip_document = edit_post('bulk_tip_document');
+            if ($bulk_tip_document === '') {
+                $bulk_tip_document = 'alte documente';
+            }
+            foreach (edit_uploaded_files('documente_sociale_bulk') as $bulk_file) {
+                [$ok, $message] = social_store_document(
+                    $conn,
+                    $bulk_file,
+                    $id,
+                    $old_fisa['id'],
+                    null,
+                    $bulk_tip_document,
+                    edit_post('bulk_observatii_document')
+                );
+                if (!$ok) {
+                    throw new Exception($message);
+                }
+                if ($message !== null) {
+                    $uploaded_documents++;
+                }
             }
 
             $conn->commit();
             $success_message = 'Fisa sociala a fost salvata.';
+            if ($uploaded_documents > 0) {
+                $success_message .= ' Documente incarcate: ' . $uploaded_documents . '.';
+            }
 
             $stmt_get = $conn->prepare("SELECT * FROM asistati_social WHERE id = ?");
             $stmt_get->bind_param("i", $id);
@@ -299,6 +612,8 @@ while ($row = $result_docs->fetch_assoc()) {
 }
 $stmt_docs->close();
 
+$image_documents = array_values(array_filter($documents, 'edit_document_is_image'));
+
 $ajutoare = array();
 $stmt_help = $conn->prepare("SELECT * FROM donatii WHERE id_asistat = ? ORDER BY data DESC, ID DESC LIMIT 50");
 $stmt_help->bind_param("i", $id);
@@ -318,6 +633,44 @@ while ($row = $result_hist->fetch_assoc()) {
     $istoric[] = $row;
 }
 $stmt_hist->close();
+
+$external_active_link = null;
+$stmt_ext = $conn->prepare("
+    SELECT *
+    FROM asistat_external_links
+    WHERE beneficiar_id = ?
+      AND revoked_at IS NULL
+      AND expires_at >= NOW()
+    ORDER BY created_at DESC
+    LIMIT 1
+");
+$stmt_ext->bind_param("i", $id);
+$stmt_ext->execute();
+$external_active_link = $stmt_ext->get_result()->fetch_assoc();
+$stmt_ext->close();
+
+$external_submissions = array();
+$stmt_sub = $conn->prepare("
+    SELECT *
+    FROM asistat_external_submissions
+    WHERE beneficiar_id = ?
+    ORDER BY submitted_at DESC, id DESC
+    LIMIT 10
+");
+$stmt_sub->bind_param("i", $id);
+$stmt_sub->execute();
+$result_sub = $stmt_sub->get_result();
+while ($row = $result_sub->fetch_assoc()) {
+    $external_submissions[] = $row;
+}
+$stmt_sub->close();
+
+$external_pending_submissions = array_values(array_filter($external_submissions, function ($submission) {
+    return ($submission['status'] ?? '') === 'nou';
+}));
+$external_applied_submissions = array_values(array_filter($external_submissions, function ($submission) {
+    return ($submission['status'] ?? '') === 'aplicat';
+}));
 ?>
 
 <div class="container mt-4">
@@ -337,6 +690,117 @@ $stmt_hist->close();
             <?php if ($success_message): ?><div class="alert alert-success"><?php echo h($success_message); ?></div><?php endif; ?>
             <?php if ($error_message): ?><div class="alert alert-danger"><?php echo h($error_message); ?></div><?php endif; ?>
 
+            <div class="card shadow mb-4">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Link extern completare date</h5>
+                    <?php if ($external_active_link): ?><span class="badge text-bg-success">activ</span><?php endif; ?>
+                </div>
+                <div class="card-body">
+                    <?php if ($generated_external_url): ?>
+                        <label class="form-label fw-bold">Link generat</label>
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control" value="<?php echo h($generated_external_url); ?>" readonly onclick="this.select();">
+                            <button type="button" class="btn btn-outline-secondary" onclick="navigator.clipboard.writeText(this.previousElementSibling.value)">Copiaza</button>
+                        </div>
+                    <?php endif; ?>
+
+                    <?php if ($external_active_link): ?>
+                        <div class="mb-3">
+                            <div class="small text-muted">Exista un link activ pana la <?php echo h($external_active_link['expires_at']); ?>.</div>
+                            <?php if (!$generated_external_url): ?>
+                                <div class="small text-muted">Din motive de securitate tokenul nu este stocat in clar. Daca linkul a fost pierdut, generati unul nou.</div>
+                            <?php endif; ?>
+                        </div>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <form method="post">
+                                <input type="hidden" name="id" value="<?php echo $id; ?>">
+                                <input type="hidden" name="external_action" value="generate_link">
+                                <button type="submit" class="btn btn-outline-primary btn-sm">Genereaza link nou</button>
+                            </form>
+                            <form method="post">
+                                <input type="hidden" name="id" value="<?php echo $id; ?>">
+                                <input type="hidden" name="external_action" value="revoke_link">
+                                <input type="hidden" name="external_link_id" value="<?php echo (int)$external_active_link['id']; ?>">
+                                <button type="submit" class="btn btn-outline-danger btn-sm">Revoca link</button>
+                            </form>
+                        </div>
+                    <?php else: ?>
+                        <form method="post">
+                            <input type="hidden" name="id" value="<?php echo $id; ?>">
+                            <input type="hidden" name="external_action" value="generate_link">
+                            <button type="submit" class="btn btn-primary btn-sm">Genereaza link completare date</button>
+                        </form>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <?php if (!empty($external_pending_submissions) || !empty($external_applied_submissions)): ?>
+                <div class="card shadow mb-4">
+                    <div class="card-header bg-light"><h5 class="mb-0">Date primite prin formular extern</h5></div>
+                    <div class="card-body">
+                        <?php if (empty($external_pending_submissions)): ?>
+                            <div class="alert alert-light border mb-3">Nu exista completari noi de aplicat.</div>
+                        <?php endif; ?>
+
+                        <?php foreach ($external_pending_submissions as $submission): ?>
+                            <?php $payload = json_decode($submission['payload_json'], true); ?>
+                            <div class="border rounded p-3 mb-3">
+                                <div class="d-flex justify-content-between align-items-start gap-3">
+                                    <div>
+                                        <div class="fw-bold">Completare #<?php echo (int)$submission['id']; ?></div>
+                                        <div class="small text-muted">
+                                            <?php echo h($submission['submitted_at']); ?>
+                                            <?php if (!empty($submission['submitted_ip'])): ?> / IP <?php echo h($submission['submitted_ip']); ?><?php endif; ?>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="badge text-bg-warning">nou</span>
+                                        <?php if (is_array($payload)): ?>
+                                            <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#externalSubmission<?php echo (int)$submission['id']; ?>" aria-expanded="false" aria-controls="externalSubmission<?php echo (int)$submission['id']; ?>">Vezi datele</button>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                                <?php if (!is_array($payload)): ?>
+                                    <div class="text-danger">Datele nu pot fi afisate.</div>
+                                <?php endif; ?>
+                                <?php if (is_array($payload)): ?>
+                                    <div class="collapse mt-3" id="externalSubmission<?php echo (int)$submission['id']; ?>">
+                                        <?php edit_render_external_payload($payload); ?>
+                                        <form method="post" class="mt-3">
+                                            <input type="hidden" name="id" value="<?php echo $id; ?>">
+                                            <input type="hidden" name="external_action" value="apply_submission">
+                                            <input type="hidden" name="submission_id" value="<?php echo (int)$submission['id']; ?>">
+                                            <button type="submit" class="btn btn-success btn-sm">Aplica aceste date in fisa</button>
+                                        </form>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                        <?php endforeach; ?>
+
+                        <?php if (!empty($external_applied_submissions)): ?>
+                            <div class="mt-3">
+                                <h6 class="text-muted mb-2">Completari aplicate recent</h6>
+                                <div class="table-responsive">
+                                    <table class="table table-sm mb-0">
+                                        <thead><tr><th>ID</th><th>Trimis la</th><th>Aplicat la</th><th>Aplicat de</th></tr></thead>
+                                        <tbody>
+                                            <?php foreach ($external_applied_submissions as $submission): ?>
+                                                <tr>
+                                                    <td>#<?php echo (int)$submission['id']; ?></td>
+                                                    <td><?php echo h($submission['submitted_at']); ?></td>
+                                                    <td><?php echo h($submission['applied_at']); ?></td>
+                                                    <td><?php echo h($submission['applied_by']); ?></td>
+                                                </tr>
+                                            <?php endforeach; ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            <?php endif; ?>
+
             <form action="edit-asistat.php?id=<?php echo $id; ?>" method="post" enctype="multipart/form-data">
                 <input type="hidden" name="id" value="<?php echo $id; ?>">
 
@@ -349,7 +813,7 @@ $stmt_hist->close();
                         <div class="col-md-2"><label class="form-label">Serie CI</label><input name="serie_ci" type="text" class="form-control" value="<?php echo h($serie_ci); ?>"></div>
                         <div class="col-md-3"><label class="form-label">Numar CI</label><input name="numar_ci" type="text" class="form-control" value="<?php echo h($numar_ci); ?>"></div>
                         <div class="col-md-3"><label class="form-label">Data nasterii</label><input name="data_nasterii" type="date" class="form-control" value="<?php echo h($asistat['data_nasterii'] ?? ''); ?>"></div>
-                        <div class="col-md-4"><label class="form-label fw-bold">Telefon *</label><input name="telefon" type="tel" class="form-control" value="<?php echo h($asistat['telefon'] ?? ''); ?>" required></div>
+                        <div class="col-md-4"><label class="form-label">Telefon</label><input name="telefon" type="tel" class="form-control" value="<?php echo h($asistat['telefon'] ?? ''); ?>"></div>
                         <div class="col-md-4"><label class="form-label">Email</label><input name="email" type="email" class="form-control" value="<?php echo h($asistat['email'] ?? ''); ?>"></div>
                         <div class="col-md-4"><label class="form-label">Stare civila</label><select name="stare_civila" class="form-select"><?php render_select_options(array('necasatorit', 'casatorit', 'divortat', 'vaduv'), $asistat['stare_civila'] ?? ''); ?></select></div>
                         <div class="col-12"><label class="form-label">Adresa completa</label><input name="adresa_completa" type="text" class="form-control" value="<?php echo h($asistat['adresa_completa'] ?? ''); ?>"></div>
@@ -451,6 +915,10 @@ $stmt_hist->close();
                         <div class="col-md-4"><label class="form-label">Tip document nou</label><select name="tip_document" class="form-select"><option value="">--</option><?php render_select_options(social_options('documente')); ?></select></div>
                         <div class="col-md-8"><label class="form-label">Incarca document nou</label><input name="document_social" type="file" class="form-control" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"></div>
                         <div class="col-12"><label class="form-label">Observatii document</label><input name="observatii_document" type="text" class="form-control"></div>
+                        <div class="col-12"><hr class="my-2"></div>
+                        <div class="col-md-4"><label class="form-label">Tip acte bulk</label><select name="bulk_tip_document" class="form-select"><option value="">Alte documente</option><?php render_select_options(social_options('documente')); ?></select></div>
+                        <div class="col-md-8"><label class="form-label">Incarca acte bulk</label><input name="documente_sociale_bulk[]" type="file" class="form-control" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" multiple></div>
+                        <div class="col-12"><label class="form-label">Observatii acte bulk</label><input name="bulk_observatii_document" type="text" class="form-control"></div>
                         <div class="col-12"><label class="form-label">Observatii interne</label><textarea name="observatii_interne" class="form-control" rows="3"><?php echo h($fisa['observatii_interne'] ?? ''); ?></textarea></div>
                         <div class="col-12"><label class="form-label">Concluzie sociala scurta</label><textarea name="concluzie_sociala" class="form-control" rows="3"><?php echo h($fisa['concluzie_sociala'] ?? ''); ?></textarea></div>
                         <div class="col-12"><label class="form-label">Recomandare finala</label><textarea name="recomandare_finala" class="form-control" rows="3"><?php echo h($fisa['recomandare_finala'] ?? ''); ?></textarea></div>
@@ -461,6 +929,122 @@ $stmt_hist->close();
                     <button type="submit" name="submit" class="btn btn-primary btn-lg px-5"><i class="bi bi-save me-2"></i> Salveaza fisa</button>
                 </div>
             </form>
+
+            <style>
+                .document-gallery {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                    gap: 12px;
+                    padding: 16px;
+                }
+                .document-gallery__item {
+                    border: 1px solid #e2e8f0;
+                    border-radius: 8px;
+                    overflow: hidden;
+                    background: #fff;
+                    text-decoration: none;
+                    color: inherit;
+                    transition: border-color .15s ease, box-shadow .15s ease;
+                }
+                .document-gallery__item:hover {
+                    border-color: #2f6f5f;
+                    box-shadow: 0 0.5rem 1rem rgba(15, 23, 42, .08);
+                }
+                .document-gallery__thumb {
+                    width: 100%;
+                    aspect-ratio: 4 / 3;
+                    object-fit: cover;
+                    background: #f8fafc;
+                    display: block;
+                }
+                .document-gallery__meta {
+                    padding: 8px;
+                    min-height: 62px;
+                }
+                .document-gallery__title {
+                    display: block;
+                    font-size: .82rem;
+                    font-weight: 600;
+                    line-height: 1.2;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+                .document-gallery__type {
+                    display: block;
+                    margin-top: 4px;
+                    font-size: .72rem;
+                    color: #64748b;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+                .document-preview-img {
+                    max-height: 78vh;
+                    object-fit: contain;
+                    background: #0f172a;
+                }
+                .document-preview-nav {
+                    position: absolute;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    z-index: 2;
+                    width: 44px;
+                    height: 44px;
+                    border-radius: 50%;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: rgba(255, 255, 255, .92);
+                    border: 1px solid rgba(15, 23, 42, .15);
+                    color: #0f172a;
+                }
+                .document-preview-nav:hover {
+                    background: #fff;
+                }
+                .document-preview-nav--prev {
+                    left: 12px;
+                }
+                .document-preview-nav--next {
+                    right: 12px;
+                }
+            </style>
+
+            <div class="card shadow mb-4">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Galerie foto acte</h5>
+                    <?php if (!empty($image_documents)): ?><span class="badge text-bg-secondary"><?php echo count($image_documents); ?></span><?php endif; ?>
+                </div>
+                <div class="card-body p-0">
+                    <?php if (empty($image_documents)): ?>
+                        <div class="p-3 text-muted">Nu exista imagini atasate.</div>
+                    <?php else: ?>
+                        <div class="document-gallery">
+                            <?php foreach ($image_documents as $index => $doc): ?>
+                                <?php
+                                    $doc_url = 'view-document-social.php?id=' . (int)$doc['id'];
+                                    $doc_name = $doc['denumire_fisier'] ?? '';
+                                    $doc_type = $doc['tip_document'] ?? '';
+                                ?>
+                                <a class="document-gallery__item"
+                                   href="<?php echo h($doc_url); ?>"
+                                   target="_blank"
+                                   data-bs-toggle="modal"
+                                   data-bs-target="#documentPreviewModal"
+                                   data-doc-src="<?php echo h($doc_url); ?>"
+                                   data-doc-title="<?php echo h($doc_name); ?>"
+                                   data-doc-index="<?php echo (int)$index; ?>">
+                                    <img class="document-gallery__thumb" src="<?php echo h($doc_url); ?>" alt="<?php echo h($doc_name); ?>" loading="lazy">
+                                    <span class="document-gallery__meta">
+                                        <span class="document-gallery__title"><?php echo h($doc_name); ?></span>
+                                        <span class="document-gallery__type"><?php echo h($doc_type); ?></span>
+                                    </span>
+                                </a>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
 
             <div class="card shadow mb-4">
                 <div class="card-header bg-light"><h5 class="mb-0">Documente atasate</h5></div>
@@ -546,6 +1130,27 @@ $stmt_hist->close();
     </div>
 </div>
 
+<div class="modal fade" id="documentPreviewModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="documentPreviewTitle">Act</h5>
+        <a class="btn btn-outline-primary btn-sm ms-auto me-2" id="documentPreviewOpen" href="#" target="_blank">Deschide</a>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Inchide"></button>
+      </div>
+      <div class="modal-body p-0 text-center bg-dark position-relative">
+        <button type="button" class="document-preview-nav document-preview-nav--prev" id="documentPreviewPrev" aria-label="Imaginea anterioara">
+            <i class="bi bi-chevron-left"></i>
+        </button>
+        <img id="documentPreviewImage" class="img-fluid document-preview-img" src="" alt="">
+        <button type="button" class="document-preview-nav document-preview-nav--next" id="documentPreviewNext" aria-label="Imaginea urmatoare">
+            <i class="bi bi-chevron-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="modal fade" id="deleteModal" tabindex="-1">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -561,5 +1166,72 @@ $stmt_hist->close();
     </div>
   </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var previewModal = document.getElementById('documentPreviewModal');
+    if (!previewModal) {
+        return;
+    }
+
+    var galleryItems = Array.prototype.slice.call(document.querySelectorAll('.document-gallery__item'));
+    var currentIndex = 0;
+
+    function showDocument(index) {
+        if (!galleryItems.length) {
+            return;
+        }
+
+        currentIndex = (index + galleryItems.length) % galleryItems.length;
+        var item = galleryItems[currentIndex];
+        var src = item.getAttribute('data-doc-src') || item.getAttribute('href') || '';
+        var title = item.getAttribute('data-doc-title') || 'Act';
+        var image = document.getElementById('documentPreviewImage');
+        var titleNode = document.getElementById('documentPreviewTitle');
+        var openLink = document.getElementById('documentPreviewOpen');
+
+        image.src = src;
+        image.alt = title;
+        titleNode.textContent = title + ' (' + (currentIndex + 1) + '/' + galleryItems.length + ')';
+        openLink.href = src;
+    }
+
+    previewModal.addEventListener('show.bs.modal', function (event) {
+        var trigger = event.relatedTarget;
+        if (!trigger) {
+            return;
+        }
+
+        var requestedIndex = parseInt(trigger.getAttribute('data-doc-index') || '0', 10);
+        showDocument(Number.isNaN(requestedIndex) ? 0 : requestedIndex);
+    });
+
+    previewModal.addEventListener('hidden.bs.modal', function () {
+        var image = document.getElementById('documentPreviewImage');
+        image.src = '';
+        image.alt = '';
+    });
+
+    document.getElementById('documentPreviewPrev').addEventListener('click', function () {
+        showDocument(currentIndex - 1);
+    });
+
+    document.getElementById('documentPreviewNext').addEventListener('click', function () {
+        showDocument(currentIndex + 1);
+    });
+
+    document.addEventListener('keydown', function (event) {
+        if (!previewModal.classList.contains('show')) {
+            return;
+        }
+
+        if (event.key === 'ArrowLeft') {
+            showDocument(currentIndex - 1);
+        } else if (event.key === 'ArrowRight') {
+            showDocument(currentIndex + 1);
+        }
+    });
+});
+</script>
 
 <?php include "includes/footer.php"; ?>
