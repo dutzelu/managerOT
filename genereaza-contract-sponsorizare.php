@@ -63,6 +63,8 @@ if ($timestamp_semnare === false) {
 $year     = date("Y", $timestamp_semnare);
 $data_rom = date("d.m.Y", $timestamp_semnare);
 $suma_formatata = number_format((float)$suma, 2, ',', '.');
+$stampila_path = __DIR__ . '/includes/stampila.png';
+$stampila_src = file_exists($stampila_path) ? str_replace('\\', '/', $stampila_path) : '';
 // pentru Direcționare 177 se redirecționează impozitul aferent anului fiscal precedent
 $an_fiscal_precedent = (int)$year - 1;
 
@@ -81,6 +83,8 @@ ob_start();
     .antet { text-align: right; font-size: 9pt; color: #333; }
     table.semnaturi { width: 100%; margin-top: 40px; }
     table.semnaturi td { width: 50%; vertical-align: top; font-size: 11pt; }
+    .stampila-asociatie { display: block; width: 34mm; height: auto; margin: 6px 0 6px 12mm; }
+    .spatiu-stampila { height: 40mm; }
 </style>
 
 <p class="antet">
@@ -214,7 +218,12 @@ ob_start();
         <td>
             <strong>BENEFICIAR,</strong><br><br>
             <?php echo ASOC_DENUMIRE; ?><br>
-            <?php echo ASOC_REPREZENTANT; ?> — <?php echo ASOC_FUNCTIE; ?><br><br><br>
+            <?php echo ASOC_REPREZENTANT; ?> — <?php echo ASOC_FUNCTIE; ?><br>
+            <?php if ($stampila_src !== ''): ?>
+                <img src="<?php echo htmlspecialchars($stampila_src, ENT_QUOTES, 'UTF-8'); ?>" class="stampila-asociatie">
+            <?php else: ?>
+                <div class="spatiu-stampila"></div>
+            <?php endif; ?>
             Semnătura și ștampila: ______________________
         </td>
     </tr>
