@@ -7,6 +7,12 @@ include "includes/header.php";
 
 if (isset($_GET['id']) && is_numeric($_GET['id'])) {
     $id_donatie = (int)$_GET['id'];
+
+    donatie_ensure_attachments_table($conn);
+    $stmt_atasamente = $conn->prepare("DELETE FROM donatii_atasamente WHERE donatie_id = ?");
+    $stmt_atasamente->bind_param("i", $id_donatie);
+    $stmt_atasamente->execute();
+    $stmt_atasamente->close();
     
     // Conexiune și interogare securizată
     // Folosim prepared statement pentru a preveni SQL injection

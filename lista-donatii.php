@@ -115,6 +115,7 @@ if ($stmt === false) {
             $act_doveditor = $data['act_doveditor'];
             $nr_act_doveditor = $data['nr_act_doveditor'];
             $link_act = $data['link_act'];
+            $atasamente_donatie = donatie_get_attachments($conn, (int)$id_donatie, $link_act);
             $proces_verbal = $data['proces_verbal'];
             $link_proces_verbal = $data['link_proces_verbal'];
             
@@ -166,10 +167,10 @@ if ($stmt === false) {
             if ($act_doveditor !== 'proces-verbal') {
                 echo '<p class="ms-4 mb-0 mt-1 text-sm">';
                 echo '    <small>Act Doveditor: ';
-                if (empty($link_act)) {
+                if (empty($atasamente_donatie)) {
                     echo htmlspecialchars($act_doveditor) . ' - ' . htmlspecialchars($nr_act_doveditor);
                 } else {
-                    echo htmlspecialchars($act_doveditor) . ' - <a href="' . htmlspecialchars($link_act) . '" target="_blank">' . htmlspecialchars($nr_act_doveditor) . '</a>';
+                    echo htmlspecialchars($act_doveditor) . ' - ' . donatie_render_attachment_links($atasamente_donatie, htmlspecialchars($nr_act_doveditor));
                 }
                 echo '</small></p>';
             }

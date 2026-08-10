@@ -1082,6 +1082,7 @@ $external_applied_submissions = array_values(array_filter($external_submissions,
                                 <thead><tr><th>ID</th><th>Data</th><th>Tip</th><th>Valoare</th><th>Scop</th><th>Documente</th></tr></thead>
                                 <tbody>
                                     <?php foreach ($ajutoare as $ajutor): ?>
+                                        <?php $atasamente_ajutor = donatie_get_attachments($conn, (int)($ajutor['ID'] ?? $ajutor['id']), $ajutor['link_act'] ?? ''); ?>
                                         <tr>
                                             <td><?php echo h($ajutor['ID'] ?? $ajutor['id']); ?></td>
                                             <td><?php echo h($ajutor['data']); ?></td>
@@ -1089,7 +1090,7 @@ $external_applied_submissions = array_values(array_filter($external_submissions,
                                             <td><?php echo number_format((float)$ajutor['suma_lei'], 2, ',', '.'); ?> lei</td>
                                             <td><?php echo h($ajutor['scop_donatie']); ?></td>
                                             <td>
-                                                <?php if (!empty($ajutor['link_act'])): ?><a href="<?php echo h($ajutor['link_act']); ?>" target="_blank">act</a><?php endif; ?>
+                                                <?php echo donatie_render_attachment_links($atasamente_ajutor); ?>
                                                 <?php if (!empty($ajutor['link_proces_verbal'])): ?> <a href="<?php echo h($ajutor['link_proces_verbal']); ?>" target="_blank">PV</a><?php endif; ?>
                                             </td>
                                         </tr>

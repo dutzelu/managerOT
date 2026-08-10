@@ -24,47 +24,9 @@ if(isset($_POST["submit"])) {
     $observatii_ajutor = test_input($_POST['observatii_ajutor'] ?? '');
     $link_act = test_input($_POST['link_act']);
 
-    $anul = substr($data, 0, 4);
-    $luna = substr($data, 5, 2);
-
     $final_link_act = $link_act;
-
-    if(isset($_FILES['file_act']) && $_FILES['file_act']['error'] == 0){
-        $file = $_FILES['file_act'];
-        $file_name = $file['name'];
-        $file_size = $file['size'];
-        $file_tmp = $file['tmp_name'];
-        $file_ext = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
-
-        $target_dir = "donatii/" . $anul . '/' . $luna;
-
-        if (!file_exists($target_dir)) {
-            if (!mkdir($target_dir, 0777, true)) {
-                $upload_errors[] = "Eroare la crearea directorului de incarcare.";
-            }
-        }
-
-        $allowed_extensions = array("jpeg","jpg","png","pdf","docx");
-
-        if(!in_array($file_ext, $allowed_extensions)){
-            $upload_errors[] = "Extensie fisier nepermisa, te rog alege JPEG, PNG, PDF sau DOCX.";
-        }
-
-        if($file_size > 5242880) {
-            $upload_errors[] = 'Dimensiunea fisierului trebuie sa fie maxim 5 MB.';
-        }
-
-        if(empty($upload_errors)) {
-            $unique_file_name = uniqid() . '_' . $file_name;
-            $target_file_path = $target_dir . '/' . $unique_file_name;
-
-            if(move_uploaded_file($file_tmp, $target_file_path)) {
-                $final_link_act = $target_file_path;
-            } else {
-                $upload_errors[] = "Eroare la mutarea fisierului incarcat.";
-            }
-        }
-    }
+    $uploaded_files = donatie_normalize_uploaded_files('file_act');
+    $upload_errors = array_merge($upload_errors, donatie_validate_uploaded_files($uploaded_files));
 
     if(empty($upload_errors)) {
         $fisa_id = null;
@@ -103,6 +65,21 @@ if(isset($_POST["submit"])) {
             );
 
             if ($stmt->execute()) {
+                $donatie_id = $stmt->insert_id;
+                if (!empty($link_act)) {
+                    donatie_add_external_attachment($conn, $donatie_id, $link_act);
+                }
+
+                $upload_result = donatie_upload_attachments($conn, $donatie_id, $data, 'file_act');
+                $upload_errors = array_merge($upload_errors, $upload_result['errors']);
+                if (!empty($upload_result['paths'])) {
+                    $final_link_act = $upload_result['paths'][0];
+                    $stmt_update_link = $conn->prepare("UPDATE donatii SET link_act = ? WHERE ID = ?");
+                    $stmt_update_link->bind_param("si", $final_link_act, $donatie_id);
+                    $stmt_update_link->execute();
+                    $stmt_update_link->close();
+                }
+
                 $succes_insert = true;
                 $donatie_id_asistat = $id_asistat;
                 $suma_lei_succes = $suma_lei;
@@ -115,7 +92,7 @@ if(isset($_POST["submit"])) {
         }
     }
 
-    if ($succes_insert) {
+    if ($succes_insert && empty($upload_errors)) {
         ob_end_clean();
         header('Location: adauga-donatie.php?donatiepentruid=' . $id_asistat . '&suma=' . urlencode($suma_lei));
         exit();
@@ -282,9 +259,9 @@ $rezultate_asistati = mysqli_query($conn, $sql_asistati);
 
                 <div class="col-md-6">
                     <label for="file_act" class="form-label fw-bold">Încarcă Act Doveditor (Fișier):</label>
-                    <input type="file" name="file_act" id="file_act" class="form-control" accept=".pdf,.jpg,.jpeg,.png,.docx">
+                    <input type="file" name="file_act[]" id="file_act" class="form-control" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" multiple>
                     <div class="form-text">
-                        Opțional: Dacă nu ai un link, încarcă fișierul. Se acceptă PDF, imagini sau DOCX (max 5 MB).
+                        Opțional: poți selecta mai multe poze sau documente odată. Se acceptă PDF, imagini, DOC sau DOCX (max 10 MB/fișier).
                     </div>
                 </div>
 

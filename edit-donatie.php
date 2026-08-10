@@ -22,6 +22,7 @@ include "includes/header.php";
         // Păstrăm $persoana din GET doar dacă este un mesaj de succes, altfel îl vom suprascrie.
         $persoana_get = $_GET['persoana'] ?? ''; 
         $succes = $_GET['succes'] ?? '';
+        $upload_error = $_GET['upload_error'] ?? '';
         $persoana = ''; // Inițializăm variabila persoana care va fi afișată
 
         // Verificare dacă ID-ul este setat, altfel redirecționează sau afișează o eroare
@@ -67,6 +68,11 @@ include "includes/header.php";
             $scop_donatie = $data['scop_donatie'];
             $data_donatiei = $data['data'];
             $observatii_ajutor = $data['observatii_ajutor'];
+            $atasamente_donatie = donatie_get_attachments($conn, (int)$id, $link_act);
+            $poze_donatie = array_values(array_filter($atasamente_donatie, 'donatie_attachment_is_image'));
+            $documente_donatie = array_values(array_filter($atasamente_donatie, function ($attachment) {
+                return !donatie_attachment_is_image($attachment);
+            }));
             
             
             // 3. FIX: Extragerea numelui beneficiarului (Asistat Social)
@@ -114,6 +120,13 @@ include "includes/header.php";
             // Folosim o alertă Bootstrap modernă
             echo '<div id="success-form" class="alert alert-success alert-dismissible fade show" role="alert">';
             echo '<strong>Succes!</strong> Donația cu id "' . htmlspecialchars($id) . '" a persoanei ' . htmlspecialchars($persoana) . ' a fost modificată cu succes.';
+            echo '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
+            echo '</div>';
+        }
+
+        if (!empty($upload_error)) {
+            echo '<div id="error-form" class="alert alert-danger alert-dismissible fade show" role="alert">';
+            echo '<strong>Eroare upload:</strong> ' . htmlspecialchars($upload_error);
             echo '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
             echo '</div>';
         }
@@ -207,9 +220,29 @@ include "includes/header.php";
 
             <div class="col-12">
                 <label for="incarcaActInput" class="form-label">Încarcă act doveditor:</label>
-                <input type="file" name="act" id="incarcaActInput" class="form-control">
-                <?php if (!empty($link_act)): ?>
-                    <small class="form-text text-muted">Document curent: <a href="<?php echo htmlspecialchars($link_act); ?>" target="_blank">Vizualizează</a></small>
+                <input type="file" name="act[]" id="incarcaActInput" class="form-control" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" multiple>
+                <small class="form-text text-muted">Poți adăuga mai multe poze sau documente odată. Fișierele existente rămân atașate donației.</small>
+
+                <?php if (!empty($poze_donatie)): ?>
+                    <div class="donatie-gallery mt-3">
+                        <?php foreach ($poze_donatie as $index_poza => $poza): ?>
+                            <?php
+                                $cale_poza = $poza['cale_fisier'];
+                                $nume_poza = trim((string)($poza['nume_original'] ?? ''));
+                                $titlu_poza = $nume_poza !== '' ? $nume_poza : 'Fotografie ' . ($index_poza + 1);
+                            ?>
+                            <button type="button" class="donatie-gallery__item" data-bs-toggle="modal" data-bs-target="#donatieGalleryModal" data-bs-slide-to="<?php echo (int)$index_poza; ?>" aria-label="Deschide fotografia <?php echo (int)($index_poza + 1); ?>">
+                                <img src="<?php echo htmlspecialchars($cale_poza); ?>" alt="<?php echo htmlspecialchars($titlu_poza); ?>">
+                            </button>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
+
+                <?php if (!empty($documente_donatie)): ?>
+                    <div class="mt-3 small">
+                        <span class="text-muted">Documente curente:</span>
+                        <?php echo donatie_render_attachment_links($documente_donatie); ?>
+                    </div>
                 <?php endif; ?>
             </div>
 
@@ -239,6 +272,66 @@ include "includes/header.php";
         </form>
     </div>
 </div>
+
+<?php if (!empty($poze_donatie)): ?>
+<div class="modal fade" id="donatieGalleryModal" tabindex="-1" aria-labelledby="donatieGalleryModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content bg-dark text-white">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title" id="donatieGalleryModalLabel">Fotografii act doveditor</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Închide"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div id="donatieGalleryCarousel" class="carousel slide" data-bs-interval="false">
+                    <div class="carousel-inner">
+                        <?php foreach ($poze_donatie as $index_poza => $poza): ?>
+                            <?php
+                                $cale_poza = $poza['cale_fisier'];
+                                $nume_poza = trim((string)($poza['nume_original'] ?? ''));
+                                $titlu_poza = $nume_poza !== '' ? $nume_poza : 'Fotografie ' . ($index_poza + 1);
+                            ?>
+                            <div class="carousel-item <?php echo $index_poza === 0 ? 'active' : ''; ?>">
+                                <img src="<?php echo htmlspecialchars($cale_poza); ?>" class="d-block w-100 donatie-gallery__full" alt="<?php echo htmlspecialchars($titlu_poza); ?>">
+                                <div class="carousel-caption d-none d-md-block">
+                                    <span class="badge bg-dark bg-opacity-75"><?php echo htmlspecialchars($titlu_poza); ?></span>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+
+                    <?php if (count($poze_donatie) > 1): ?>
+                        <button class="carousel-control-prev" type="button" data-bs-target="#donatieGalleryCarousel" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Anterior</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#donatieGalleryCarousel" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Următor</span>
+                        </button>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var modal = document.getElementById('donatieGalleryModal');
+    var carouselEl = document.getElementById('donatieGalleryCarousel');
+    if (!modal || !carouselEl) {
+        return;
+    }
+
+    modal.addEventListener('show.bs.modal', function (event) {
+        var trigger = event.relatedTarget;
+        var slideTo = trigger ? parseInt(trigger.getAttribute('data-bs-slide-to') || '0', 10) : 0;
+        var carousel = bootstrap.Carousel.getOrCreateInstance(carouselEl, { interval: false });
+        carousel.to(slideTo);
+    });
+});
+</script>
+<?php endif; ?>
 
 </div> 
 <?php 

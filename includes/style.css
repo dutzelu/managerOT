@@ -512,6 +512,34 @@ textarea.mare {
     display: none;
 }
 
+.donatie-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 10px;
+}
+
+.donatie-gallery__item {
+    aspect-ratio: 1;
+    border: 1px solid var(--ot-border);
+    border-radius: 8px;
+    background: #fff;
+    padding: 4px;
+    overflow: hidden;
+}
+
+.donatie-gallery__item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 5px;
+}
+
+.donatie-gallery__full {
+    max-height: 78vh;
+    object-fit: contain;
+    background: #111;
+}
+
 .offcanvas {
     background: var(--ot-bg);
 }

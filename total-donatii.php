@@ -192,6 +192,7 @@ while ($date = mysqli_fetch_assoc($result)){
     
     $suma_formatata_donatie = number_format($date['suma_lei'], 0, '', '.'); 
     $data_formatata = strftime("%d %b. %Y", strtotime($data_db)); 
+    $atasamente_donatie = donatie_get_attachments($conn, (int)$date['id_donatie'], $date['link_act']);
     
     
     $luna_buffer .= '<li class="list-group-item" id="donatie-' . htmlspecialchars($date['id_donatie']) . '">';
@@ -227,9 +228,8 @@ while ($date = mysqli_fetch_assoc($result)){
         $luna_buffer .= '<div class="mt-2 d-flex flex-wrap">';
         
             // Link Act Doveditor
-            if (!empty($date['link_act'])) {
-                $luna_buffer .= '<span class="me-3">Act: <a href="' . htmlspecialchars($date['link_act']) . '" target="_blank" class="text-decoration-none text-info">';
-                $luna_buffer .= '<i class="bi bi-file-earmark-text"></i> ' . htmlspecialchars($date['nr_act_doveditor']) . "</a></span>";
+            if (!empty($atasamente_donatie)) {
+                $luna_buffer .= '<span class="me-3">Act: ' . donatie_render_attachment_links($atasamente_donatie, htmlspecialchars($date['nr_act_doveditor'])) . '</span>';
             } else if (!empty($date['nr_act_doveditor'])) {
                 $luna_buffer .= '<span class="me-3">Act: ' . htmlspecialchars($date['nr_act_doveditor']) . '</span>';
             }

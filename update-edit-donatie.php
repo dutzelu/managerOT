@@ -1,13 +1,17 @@
-﻿<?php
-include "includes/header.php";
+<?php
+require_once __DIR__ . "/includes/conexiune.php";
+require_once __DIR__ . "/includes/functii.php";
 
-if (isset($_GET['id'])) {
-    $id = $_GET['id'];
-    $persoana = $_GET['persoana'];
+if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
+    header('Location: lista-donatii.php');
+    exit;
 }
 
-if(isset ($_POST["submit"]) ) {
+$id = (int)$_GET['id'];
+$persoana = $_GET['persoana'] ?? '';
+$errors = array();
 
+if (isset($_POST["submit"])) {
     $suma_lei = test_input($_POST['suma_lei']);
     $tip_donatie = test_input($_POST['tip_donatie']);
     $mod_acordare = test_input($_POST['mod_acordare'] ?? '');
@@ -22,79 +26,73 @@ if(isset ($_POST["submit"]) ) {
     $data_donatiei = test_input($_POST['data']);
     $proces_verbal = test_input($_POST['proces_verbal']);
     $link_proces_verbal = test_input($_POST['link_proces_verbal']);
-    $anul = substr ($data_donatiei, 0,4);
-    $luna = substr ($data_donatiei, 5,2);
-    
-    $target_dir = "asistati-social/" . replaceSpecialChars($persoana);
 
+    $uploaded_files = donatie_normalize_uploaded_files('act');
+    $errors = array_merge($errors, donatie_validate_uploaded_files($uploaded_files));
 
-    if(isset($_FILES['act'])){
+    if (empty($errors)) {
+        $upload_result = donatie_upload_attachments($conn, $id, $data_donatiei, 'act');
+        $errors = array_merge($errors, $upload_result['errors']);
 
-        $errors= array();
-        $file_name = $_FILES['act']['name'];
-        $file_size = $_FILES['act']['size'];
-        $file_tmp = $_FILES['act']['tmp_name'];
-        $file_type = $_FILES['act']['type'];
-        $file_ext= strtolower(pathinfo($file_name,PATHINFO_EXTENSION));
-        
-        $extensions= array("jpeg","jpg","png");
-        
-        if(in_array($file_ext,$extensions)=== false){
-          $errors[]="extension not allowed, please choose a JPEG or PNG file.";
+        if (!empty($link_act)) {
+            donatie_add_external_attachment($conn, $id, $link_act);
         }
-        
-        if($file_size > 5097152) {
-          $errors[]='File size must be excately 2 MB';
+
+        if (!empty($upload_result['paths'])) {
+            $link_act = $upload_result['paths'][0];
         }
-        
-        if(empty($errors)==true) {
+    }
 
-          // directorul unde se vor încarca actele doveditoare (facturi, chitante, etc.)
-          $target_dir = "procese-verbale/" . $anul . '/' . $luna;
+    if (empty($errors)) {
+        $stmt = $conn->prepare("
+            UPDATE `donatii`
+            SET
+              `suma_lei` = ?,
+              `tip_donatie` = ?,
+              `mod_acordare` = ?,
+              `act_doveditor` = ?,
+              `nr_act_doveditor` = ?,
+              `cont_beneficiar` = ?,
+              `numar_ordin_plata` = ?,
+              `sursa_fondurilor` = ?,
+              `link_act` = ?,
+              `proces_verbal` = ?,
+              `link_proces_verbal` = ?,
+              `scop_donatie` = ?,
+              `observatii_ajutor` = ?,
+              `data` = ?
+            WHERE `ID` = ?
+        ");
 
-          // dacă directorul nu există, va fi creat
-          if (!file_exists($target_dir)) {
-          mkdir($target_dir, 0777, true);}
+        $stmt->bind_param(
+            "ssssssssssssssi",
+            $suma_lei,
+            $tip_donatie,
+            $mod_acordare,
+            $act_doveditor,
+            $nr_act_doveditor,
+            $cont_beneficiar,
+            $numar_ordin_plata,
+            $sursa_fondurilor,
+            $link_act,
+            $proces_verbal,
+            $link_proces_verbal,
+            $scop_donatie,
+            $observatii_ajutor,
+            $data_donatiei,
+            $id
+        );
+        $stmt->execute();
+        $stmt->close();
 
-          move_uploaded_file($file_tmp, $target_dir .'/'.$file_name);
-          echo "Success";
-        } else{print_r($errors);}
+        header('Location: edit-donatie.php?id=' . $id . '&succes=1&persoana=' . urlencode($persoana));
+        exit;
+    }
 
-        if ($file_size !== 0 && empty($errors)==true ) {
-        $link_act = $target_dir .'/'.$file_name; }
-        // else {$link_act = "";}
-
-    } 
-    
-    $query="
-    UPDATE `donatii` 
-    
-    SET 
-    
-    `suma_lei` = '$suma_lei',
-    `tip_donatie` = '$tip_donatie',
-    `mod_acordare` = '$mod_acordare',
-    `act_doveditor` = '$act_doveditor',
-    `nr_act_doveditor` = '$nr_act_doveditor',
-    `cont_beneficiar` = '$cont_beneficiar',
-    `numar_ordin_plata` = '$numar_ordin_plata',
-    `sursa_fondurilor` = '$sursa_fondurilor',
-    `link_act` = '$link_act',
-    `proces_verbal` = '$proces_verbal',
-    `link_proces_verbal` = '$link_proces_verbal',
-    `scop_donatie` = '$scop_donatie',
-    `observatii_ajutor` = '$observatii_ajutor',
-    `data` = '$data_donatiei'
-
-     WHERE `id` = '$id';";
-
-
-    $rez=mysqli_query($conn, $query);
+    header('Location: edit-donatie.php?id=' . $id . '&upload_error=' . urlencode(implode(' ', $errors)) . '&persoana=' . urlencode($persoana));
+    exit;
 }
 
-else {echo "Problem updating record.MySQL Error: " . mysqli_error($query);}
-
-header ('Location:edit-donatie.php?id='. $id . '&succes=' . $persoana);
-
-
+header('Location: edit-donatie.php?id=' . $id . '&persoana=' . urlencode($persoana));
+exit;
 ?>

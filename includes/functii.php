@@ -1,4 +1,228 @@
 <?php
+
+function donatie_ensure_attachments_table($conn) {
+  static $checked = false;
+  if ($checked) {
+    return;
+  }
+
+  $conn->query("
+    CREATE TABLE IF NOT EXISTS `donatii_atasamente` (
+      `id` int(11) NOT NULL AUTO_INCREMENT,
+      `donatie_id` int(11) NOT NULL,
+      `cale_fisier` text NOT NULL,
+      `nume_original` varchar(255) NOT NULL,
+      `tip_fisier` varchar(120) NOT NULL DEFAULT '',
+      `dimensiune` int(11) NOT NULL DEFAULT 0,
+      `data_incarcare` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      PRIMARY KEY (`id`),
+      KEY `idx_donatie_id` (`donatie_id`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  ");
+
+  $checked = true;
+}
+
+function donatie_normalize_uploaded_files($field) {
+  $files = $_FILES[$field] ?? null;
+  if (!$files) {
+    return array();
+  }
+
+  if (!is_array($files['name'])) {
+    if (($files['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
+      return array();
+    }
+
+    return array(array(
+      'name' => $files['name'] ?? '',
+      'type' => $files['type'] ?? '',
+      'tmp_name' => $files['tmp_name'] ?? '',
+      'error' => $files['error'] ?? UPLOAD_ERR_NO_FILE,
+      'size' => $files['size'] ?? 0
+    ));
+  }
+
+  $normalized = array();
+  foreach ($files['name'] as $index => $name) {
+    $error = $files['error'][$index] ?? UPLOAD_ERR_NO_FILE;
+    if ($error === UPLOAD_ERR_NO_FILE) {
+      continue;
+    }
+
+    $normalized[] = array(
+      'name' => $name,
+      'type' => $files['type'][$index] ?? '',
+      'tmp_name' => $files['tmp_name'][$index] ?? '',
+      'error' => $error,
+      'size' => $files['size'][$index] ?? 0
+    );
+  }
+
+  return $normalized;
+}
+
+function donatie_validate_uploaded_files($files) {
+  $errors = array();
+  $allowed_extensions = array("jpeg", "jpg", "png", "pdf", "doc", "docx");
+  $max_size = 10 * 1024 * 1024;
+
+  foreach ($files as $file) {
+    $file_name = (string)($file['name'] ?? '');
+    $file_size = (int)($file['size'] ?? 0);
+    $file_error = (int)($file['error'] ?? UPLOAD_ERR_NO_FILE);
+    $file_ext = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
+
+    if ($file_error !== UPLOAD_ERR_OK) {
+      $errors[] = "Fisierul " . $file_name . " nu a putut fi incarcat.";
+      continue;
+    }
+
+    if (!in_array($file_ext, $allowed_extensions, true)) {
+      $errors[] = "Extensie fisier nepermisa pentru " . $file_name . ". Se accepta JPEG, PNG, PDF, DOC sau DOCX.";
+    }
+
+    if ($file_size > $max_size) {
+      $errors[] = "Fisierul " . $file_name . " depaseste limita de 10 MB.";
+    }
+  }
+
+  return $errors;
+}
+
+function donatie_safe_filename($filename) {
+  $filename = replaceSpecialChars($filename);
+  $filename = preg_replace('/[^A-Za-z0-9._-]+/', '-', $filename);
+  $filename = trim($filename, '.-');
+  return $filename !== '' ? $filename : 'document';
+}
+
+function donatie_upload_attachments($conn, $donatie_id, $data_donatiei, $field) {
+  donatie_ensure_attachments_table($conn);
+
+  $files = donatie_normalize_uploaded_files($field);
+  $errors = donatie_validate_uploaded_files($files);
+  $saved_paths = array();
+
+  if (!empty($errors) || empty($files)) {
+    return array('errors' => $errors, 'paths' => $saved_paths);
+  }
+
+  $anul = substr($data_donatiei, 0, 4);
+  $luna = substr($data_donatiei, 5, 2);
+  $target_dir = "donatii/" . $anul . "/" . $luna . "/donatie-" . (int)$donatie_id;
+
+  if (!file_exists($target_dir) && !mkdir($target_dir, 0777, true)) {
+    return array('errors' => array("Eroare la crearea directorului de incarcare."), 'paths' => $saved_paths);
+  }
+
+  foreach ($files as $file) {
+    $safe_name = donatie_safe_filename($file['name']);
+    $unique_file_name = uniqid('', true) . '_' . $safe_name;
+    $target_file_path = $target_dir . '/' . $unique_file_name;
+
+    if (!move_uploaded_file($file['tmp_name'], $target_file_path)) {
+      $errors[] = "Eroare la mutarea fisierului " . $file['name'] . ".";
+      continue;
+    }
+
+    $stmt = $conn->prepare("
+      INSERT INTO donatii_atasamente
+      (`donatie_id`, `cale_fisier`, `nume_original`, `tip_fisier`, `dimensiune`)
+      VALUES (?, ?, ?, ?, ?)
+    ");
+    $tip_fisier = $file['type'] ?? '';
+    $dimensiune = (int)($file['size'] ?? 0);
+    $stmt->bind_param("isssi", $donatie_id, $target_file_path, $file['name'], $tip_fisier, $dimensiune);
+    $stmt->execute();
+    $stmt->close();
+
+    $saved_paths[] = $target_file_path;
+  }
+
+  return array('errors' => $errors, 'paths' => $saved_paths);
+}
+
+function donatie_add_external_attachment($conn, $donatie_id, $link, $label = 'Link act doveditor') {
+  $link = trim((string)$link);
+  if ($link === '') {
+    return;
+  }
+
+  donatie_ensure_attachments_table($conn);
+  $stmt_check = $conn->prepare("SELECT id FROM donatii_atasamente WHERE donatie_id = ? AND cale_fisier = ? LIMIT 1");
+  $stmt_check->bind_param("is", $donatie_id, $link);
+  $stmt_check->execute();
+  $exists = $stmt_check->get_result()->fetch_assoc();
+  $stmt_check->close();
+
+  if ($exists) {
+    return;
+  }
+
+  $tip = 'link extern';
+  $dimensiune = 0;
+  $stmt = $conn->prepare("
+    INSERT INTO donatii_atasamente
+    (`donatie_id`, `cale_fisier`, `nume_original`, `tip_fisier`, `dimensiune`)
+    VALUES (?, ?, ?, ?, ?)
+  ");
+  $stmt->bind_param("isssi", $donatie_id, $link, $label, $tip, $dimensiune);
+  $stmt->execute();
+  $stmt->close();
+}
+
+function donatie_get_attachments($conn, $donatie_id, $legacy_link = '') {
+  donatie_ensure_attachments_table($conn);
+  $attachments = array();
+
+  $stmt = $conn->prepare("SELECT * FROM donatii_atasamente WHERE donatie_id = ? ORDER BY id ASC");
+  $stmt->bind_param("i", $donatie_id);
+  $stmt->execute();
+  $result = $stmt->get_result();
+  while ($row = $result->fetch_assoc()) {
+    $attachments[] = $row;
+  }
+  $stmt->close();
+
+  if (empty($attachments) && trim((string)$legacy_link) !== '') {
+    $attachments[] = array(
+      'id' => 0,
+      'donatie_id' => $donatie_id,
+      'cale_fisier' => $legacy_link,
+      'nume_original' => basename((string)$legacy_link),
+      'tip_fisier' => '',
+      'dimensiune' => 0
+    );
+  }
+
+  return $attachments;
+}
+
+function donatie_render_attachment_links($attachments, $empty_text = '') {
+  if (empty($attachments)) {
+    return $empty_text;
+  }
+
+  $links = array();
+  foreach ($attachments as $index => $attachment) {
+    $label = trim((string)($attachment['nume_original'] ?? ''));
+    if ($label === '') {
+      $label = 'Act ' . ($index + 1);
+    }
+    $path = (string)($attachment['cale_fisier'] ?? '');
+    $links[] = '<a href="' . htmlspecialchars($path) . '" target="_blank" class="text-decoration-none"><i class="bi bi-paperclip"></i> ' . htmlspecialchars($label) . '</a>';
+  }
+
+  return implode(' <span class="text-muted">|</span> ', $links);
+}
+
+function donatie_attachment_is_image($attachment) {
+  $path = (string)($attachment['cale_fisier'] ?? $attachment['nume_original'] ?? '');
+  $url_path = parse_url($path, PHP_URL_PATH);
+  $ext = strtolower(pathinfo($url_path ?: $path, PATHINFO_EXTENSION));
+  return in_array($ext, array('jpg', 'jpeg', 'png'), true);
+}
 // validează inputurile în formular
 function test_input($data) {
     $data = trim($data);
